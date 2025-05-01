@@ -1,0 +1,265 @@
+.outfit-generator {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.generator-header {
+  padding: 20px 145.5px;
+}
+
+.generator-header h1 {
+  font-size: 40px;
+  font-weight: bold;
+  color: #111827;
+  margin: 0;
+}
+
+.generator-header p {
+  color: #6B7280;
+  margin-top: 12px;
+  font-size: 16px;
+}
+
+.generator-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.preferences-container {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.preferences-container h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 32px;
+}
+
+.preference-group {
+  margin-bottom: 32px;
+}
+
+.preference-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.preference-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preference-btn {
+  padding: 8px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preference-btn:hover {
+  border-color: #0EA5E9;
+  color: #0EA5E9;
+}
+
+.preference-btn.active {
+  background: #0EA5E9;
+  color: white;
+  border-color: #0EA5E9;
+}
+
+.preference-btn[data-type="sunny"].active {
+  background: #F97316;
+  border-color: #F97316;
+}
+
+.preference-btn[data-type="spring"].active {
+  background: #10B981;
+  border-color: #10B981;
+}
+
+.generate-outfit-btn {
+  width: 100%;
+  max-width: 200px;
+  margin: 20px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0EA5E9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.generate-outfit-btn:hover {
+  background: #0284C7;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.generated-outfit {
+  margin-top: 40px;
+}
+
+.outfit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.outfit-item h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.item-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.item-image {
+  width: 100%;
+  height: 250px;
+  background: #F3F4F6;
+}
+
+.item-card p {
+  padding: 12px;
+  margin: 0;
+  font-size: 14px;
+  color: #4B5563;
+}
+
+.outfit-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.save-btn,
+.regenerate-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: #0EA5E9;
+  color: white;
+  border: none;
+}
+
+.save-btn:hover {
+  background: #0284C7;
+}
+
+.regenerate-btn {
+  background: white;
+  color: #0EA5E9;
+  border: 1px solid #0EA5E9;
+}
+
+.regenerate-btn:hover {
+  background: #F0F9FF;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.close-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-modal:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+} 

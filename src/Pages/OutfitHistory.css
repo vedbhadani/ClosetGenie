@@ -1,0 +1,171 @@
+.outfit-history {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px 0;
+}
+
+.history-header {
+  padding: 20px 145.5px;
+}
+
+.history-header h1 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #0c4a6e;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.history-header p {
+  color: #525252;
+  margin-top: 4px;
+  font-size: 16px;
+}
+
+.history-container {
+  padding: 0 145.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.no-history {
+  background: white;
+  border-radius: 12px;
+  padding: 60px;
+  text-align: center;
+  color: #6b7280;
+  margin-top: 20px;
+}
+
+.no-history i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #9ca3af;
+}
+
+.no-history p {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.no-history span {
+  font-size: 14px;
+}
+
+.history-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-date {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.history-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  background: #f3f4f6;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.delete-outfit {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.delete-outfit:hover {
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+.history-content {
+  display: grid;
+  gap: 24px;
+}
+
+.base-item h3,
+.suggestion-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 12px;
+}
+
+.base-item p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #4b5563;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.suggestion-content p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.preferences {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.preference {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preference .label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.preference .value {
+  color: #111827;
+  font-weight: 500;
+  font-size: 14px;
+} 
