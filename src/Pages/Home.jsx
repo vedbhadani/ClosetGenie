@@ -2,7 +2,7 @@ import React from 'react'
 import hero from "../images/hero1.png";
 import { Link } from 'react-router-dom';
 import '../App.css';
-import './Home.css';
+import './home.css';
 
 function Home() {
   return (
