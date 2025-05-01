@@ -176,7 +176,7 @@ const GetAI = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "anthropic/claude-3-haiku",
+          model: "mistral/mistral-medium",
           messages: [{ role: "user", content: prompt }]
         })
       });
