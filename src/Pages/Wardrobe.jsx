@@ -5,6 +5,9 @@ import './wardrobe.css';
 function Wardrobe() {
   const [activeFilter, setActiveFilter] = useState('All Items');
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState('grid');
   const [items, setItems] = useState(() => {
     try {
       const savedItems = localStorage.getItem('wardrobeItems');
@@ -92,140 +95,268 @@ function Wardrobe() {
   };
 
   const getFilteredItems = () => {
-    if (activeFilter === 'All Items') return items;
-    return items.filter(item => item.category === activeFilter);
+    let filtered = items;
+    
+    // Filter by category
+    if (activeFilter !== 'All Items') {
+      filtered = filtered.filter(item => item.category === activeFilter);
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Sort items
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return b.id - a.id;
+        case 'oldest':
+          return a.id - b.id;
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'category':
+          return a.category.localeCompare(b.category);
+        default:
+          return 0;
+      }
+    });
+    
+    return filtered;
   };
 
+  const getWardrobeStats = () => {
+    const totalItems = items.length;
+    const categories = [...new Set(items.map(item => item.category))];
+    const recentItems = items.filter(item => {
+      const itemDate = new Date(item.id);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      return itemDate > weekAgo;
+    }).length;
+    
+    return {
+      total: totalItems,
+      categories: categories.length,
+      recent: recentItems,
+      mostUsedCategory: items.length > 0 ? 
+        items.reduce((acc, item) => {
+          acc[item.category] = (acc[item.category] || 0) + 1;
+          return acc;
+        }, {}) : {}
+    };
+  };
+
+  const stats = getWardrobeStats();
+  const filteredItems = getFilteredItems();
+
   return (
-    <div style={{backgroundColor:'#f5f5f5', minHeight: '100vh', padding: '20px 0'}}>
-      <div style={{padding:'20px 145.5px',display:'flex',justifyContent:'space-between', alignItems: 'center'}}>
-        <div className="wardrobe">
-          <p style={{fontSize:'30px',fontWeight:'bold',color:'#0c4a6e',lineHeight:'15px'}}>My Wardrobe</p>
-          <p style={{color: "#525252"}}> Manage your clothing items and accessories</p>
+    <div className="wardrobe-container">
+      {/* Header Section */}
+      <section className="wardrobe-header">
+        <div className="header-content">
+          <div className="header-text">
+            <h1 className="wardrobe-title">My Wardrobe</h1>
+            <p className="wardrobe-subtitle">Organize and manage your clothing collection</p>
+          </div>
+          <button className="add-item-btn" onClick={() => setShowModal(true)}>
+            <i className="bi bi-plus-lg"></i>
+            Add New Item
+          </button>
         </div>
-        <button 
-          type="button" 
-          onClick={() => setShowModal(true)}
-          style={{
-            backgroundColor: '#0ea5e9',
-            color: 'white',
-            borderRadius: '8px',
-            padding: '10px 20px',
-            border: 'none',
-            fontSize: '15px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'background-color 0.2s ease-in-out',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0284c7'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0ea5e9'}>
-          <span style={{ fontSize: '20px', marginTop: '-2px' }}>+</span>
-          Add Item
-        </button>
-      </div>
+      </section>
 
-      <div style={{
-        padding: '0 145.5px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px'
-      }}>
-        <div style={{
-          width: '530px'
-        }}>
-          <input 
-            type="text" 
-            placeholder='Search your wardrobe...' 
-            style={{
-              width: '100%',
-              height: '40px',
-              borderRadius: '10px',
-              border: '1px solid #0ea5e9',
-              padding: '0 15px',
-              fontSize: '14px',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-            }}
-          />
-        </div>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          flex: 1,
-          justifyContent: 'flex-end'
-        }}>
-          {['All Items', 'Tops', 'Bottoms', 'Footwear', 'Outerwear', 'Accessories'].map((text) => (
-            <button
-              key={text}
-              onClick={() => setActiveFilter(text)}
-              style={{
-                padding: '8px 10px',
-                borderRadius: '20px',
-                border: '1px solid #0ea5e9',
-                backgroundColor: activeFilter === text ? '#0ea5e9' : 'white',
-                color: activeFilter === text ? 'white' : '#333',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease-in-out',
-                minWidth: 'max-content',
-                width: '110px'
-              }}
-              onMouseOver={(e) => {
-                if (activeFilter !== text) {
-                  e.currentTarget.style.backgroundColor = '#0ea5e9';
-                  e.currentTarget.style.color = 'white';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (activeFilter !== text) {
-                  e.currentTarget.style.backgroundColor = 'white';
-                  e.currentTarget.style.color = '#333';
-                }
-              }}
-            >
-              {text}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="items-grid">
-        {getFilteredItems().map(item => (
-          <div key={item.id} className="item-card">
-            <div className="item-image-container">
-              <img src={item.imageUrl} alt={item.name} className="item-image" />
-              <div className="item-actions">
-                <button 
-                  className="delete-btn"
-                  onClick={() => handleDeleteItem(item.id)}
-                  aria-label="Delete item"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
+      {/* Stats Section */}
+      <section className="stats-section">
+        <div className="stats-container">
+          <div className="stat-card">
+            <div className="stat-icon gradient-bg-blue">
+              <i className="bi bi-collection"></i>
             </div>
-            <div className="item-info">
-              <h3>{item.name}</h3>
-              <div className="item-category">
-                <span className={`category-dot ${item.category.toLowerCase()}`}></span>
-                {item.category}
-              </div>
-              <div className="item-seasons">
-                {item.seasons.map(season => (
-                  <span key={season} className="season-tag">{season}</span>
-                ))}
-              </div>
+            <div className="stat-content">
+              <span className="stat-number">{stats.total}</span>
+              <span className="stat-label">Total Items</span>
             </div>
           </div>
-        ))}
+          <div className="stat-card">
+            <div className="stat-icon gradient-bg-green">
+              <i className="bi bi-tags"></i>
+            </div>
+            <div className="stat-content">
+              <span className="stat-number">{stats.categories}</span>
+              <span className="stat-label">Categories</span>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon gradient-bg-purple">
+              <i className="bi bi-clock-history"></i>
+            </div>
+            <div className="stat-content">
+              <span className="stat-number">{stats.recent}</span>
+              <span className="stat-label">Added This Week</span>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon gradient-bg-orange">
+              <i className="bi bi-star"></i>
+            </div>
+            <div className="stat-content">
+              <span className="stat-number">{Object.keys(stats.mostUsedCategory).length > 0 ? Math.max(...Object.values(stats.mostUsedCategory)) : 0}</span>
+              <span className="stat-label">Most in Category</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Controls Section */}
+      <section className="controls-section">
+        <div className="controls-container">
+          <div className="search-controls">
+            <div className="search-box">
+              <i className="bi bi-search"></i>
+              <input
+                type="text"
+                placeholder="Search your wardrobe..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="sort-controls">
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-select"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name">Name A-Z</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+            <div className="view-controls">
+              <button 
+                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+              >
+                <i className="bi bi-grid-3x3-gap"></i>
+              </button>
+              <button 
+                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+              >
+                <i className="bi bi-list"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div className="filter-controls">
+            <div className="filter-tabs">
+              {['All Items', 'Tops', 'Bottoms', 'Footwear', 'Outerwear', 'Accessories'].map((category) => (
+                <button
+                  key={category}
+                  className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
+                  onClick={() => setActiveFilter(category)}
+                >
+                  <span className="tab-text">{category}</span>
+                  <span className="tab-count">
+                    {category === 'All Items' 
+                      ? items.length 
+                      : items.filter(item => item.category === category).length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Items Section */}
+      <section className="items-section">
+        <div className="items-container">
+          <div className="items-header">
+            <h2 className="items-title">
+              {activeFilter === 'All Items' ? 'All Items' : activeFilter}
+              <span className="items-count">({filteredItems.length})</span>
+            </h2>
+          </div>
+
+          {filteredItems.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <i className="bi bi-inbox"></i>
+              </div>
+              <h3>No items found</h3>
+              <p>
+                {items.length === 0 
+                  ? "Start building your digital wardrobe by adding your first clothing item!"
+                  : searchQuery 
+                    ? `No items match "${searchQuery}". Try a different search term.`
+                    : `No items in ${activeFilter}. Try a different category or add some items.`
+                }
+              </p>
+              {items.length === 0 && (
+                <button className="empty-cta-btn" onClick={() => setShowModal(true)}>
+                  <i className="bi bi-plus-lg"></i>
+                  Add Your First Item
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className={`items-grid ${viewMode}`}>
+              {filteredItems.map(item => (
+                <div key={item.id} className="item-card">
+                  <div className="item-image-container">
+                    <img src={item.imageUrl} alt={item.name} className="item-image" />
+                    <div className="item-overlay">
+                      <div className="item-actions">
+                        <button 
+                          className="action-btn edit-btn"
+                          aria-label="Edit item"
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button 
+                          className="action-btn delete-btn"
+                          onClick={() => handleDeleteItem(item.id)}
+                          aria-label="Delete item"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="item-content">
+                    <h3 className="item-name">{item.name}</h3>
+                    <div className="item-meta">
+                      <div className="item-category">
+                        <span className={`category-dot ${item.category.toLowerCase()}`}></span>
+                        <span>{item.category}</span>
+                      </div>
+                      <div className="item-seasons">
+                        {item.seasons.slice(0, 2).map(season => (
+                          <span key={season} className="season-tag">{season}</span>
+                        ))}
+                        {item.seasons.length > 2 && (
+                          <span className="season-tag more">+{item.seasons.length - 2}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Quick Actions Floating Button */}
+      <div className="floating-actions">
+        <button className="fab-main" onClick={() => setShowModal(true)}>
+          <i className="bi bi-plus"></i>
+        </button>
       </div>
 
       {showModal && (
