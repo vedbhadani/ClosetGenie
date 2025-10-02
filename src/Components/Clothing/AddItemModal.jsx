@@ -129,11 +129,12 @@ const AddItemModal = ({ onClose, onAdd }) => {
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
-            onClick={handleUploadClick}
-          >
+            onClick={handleUploadClick}>
+            
             {previewUrl ? (
               <div className="preview-container">
                 <img src={previewUrl} alt="Preview" className="preview-image" />
+           
                 <button 
                   type="button"
                   className="remove-image"
