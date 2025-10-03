@@ -13,6 +13,7 @@ export default function OutfitGenerator() {
   const [favoriteOutfits, setFavoriteOutfits] = useState([]);
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [notice, setNotice] = useState(null); // { type: 'warning'|'info', text: string }
+  const [aiDescription, setAiDescription] = useState("");
 
   // Load wardrobe items from localStorage
   useEffect(() => {
@@ -55,10 +56,7 @@ export default function OutfitGenerator() {
 
     setIsGenerating(true);
     
-    // Simulate AI generation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Simple outfit generation logic (can be enhanced with real AI)
+    // Simple outfit generation logic
     const filteredItems = wardrobeItems.filter(item => {
       // Filter based on season if seasons are available
       if (item.seasons && item.seasons.length > 0) {
@@ -97,7 +95,22 @@ export default function OutfitGenerator() {
     setOutfitHistory(newHistory);
     localStorage.setItem('outfitHistory', JSON.stringify(newHistory));
     
-    setIsGenerating(false);
+    // Fetch AI description via proxy (non-blocking for UI)
+    try {
+      const prompt = `Create a short, friendly 3-4 sentence description for an outfit with ${outfit.items.length} items for a ${outfit.occasion} occasion in ${outfit.season}. Weather: ${outfit.weather}. Style vibe: ${outfit.styleVibe || 'any'}. Mention key categories and when it works well.`;
+      const resp = await fetch('/api/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await resp.json();
+      setAiDescription(data.content || "");
+    } catch (err) {
+      console.error('AI suggest error:', err);
+      setAiDescription("");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const getRandomOutfitItems = (items) => {
@@ -424,11 +437,15 @@ export default function OutfitGenerator() {
 
               <div className="outfit-description">
                 <h3>About This Outfit</h3>
-                <p>
-                  Perfect for {generatedOutfit.occasion} occasions during {generatedOutfit.season} season. 
-                  {generatedOutfit.weather !== generatedOutfit.season && ` Ideal for ${generatedOutfit.weather} weather.`}
-                  {generatedOutfit.styleVibe && ` Styled with a ${generatedOutfit.styleVibe} vibe.`}
-                </p>
+            {aiDescription ? (
+              <p>{aiDescription}</p>
+            ) : (
+              <p>
+                Perfect for {generatedOutfit.occasion} occasions during {generatedOutfit.season} season. 
+                {generatedOutfit.weather !== generatedOutfit.season && ` Ideal for ${generatedOutfit.weather} weather.`}
+                {generatedOutfit.styleVibe && ` Styled with a ${generatedOutfit.styleVibe} vibe.`}
+              </p>
+            )}
               </div>
 
               <div className="outfit-actions">
