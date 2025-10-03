@@ -169,16 +169,20 @@ const GetAI = () => {
     const prompt = `Suggest a complete outfit to pair with a ${colorName} ${clothingType} for a ${occasion} occasion. The overall vibe should be ${vibe}, suitable for ${weather} weather during the ${season} season. Recommend matching clothing items, including tops, bottoms, shoes, and accessories that complement the main piece. and give the sugessiont in points`;
 
     try {
-      const response = await fetch("/api/suggest", {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
+          "Authorization": "Bearer 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",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({
+          model: "anthropic/claude-3-haiku",
+          messages: [{ role: "user", content: prompt }]
+        })
       });
 
       const data = await response.json();
-      setSuggestion(data.content || "No suggestion received.");
+      setSuggestion(data.choices?.[0]?.message?.content || "No suggestion received.");
     } catch (error) {
       console.error("Error:", error);
       setSuggestion("Failed to get suggestion. Please try again.");

@@ -243,7 +243,7 @@
 }
 
 .save-btn {
-  background: var(--cg-gradient);
+  background-color: #0ea5e9;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -257,7 +257,11 @@
   margin: 0 auto;
 }
 
-.save-btn:hover { transform: translateY(-1px); box-shadow: var(--cg-shadow); }
+.save-btn:hover {
+  background-color: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+}
 
 @media (max-width: 1024px) {
   .get-ai-content {
