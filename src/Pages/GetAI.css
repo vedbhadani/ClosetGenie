@@ -11,12 +11,9 @@
   margin-bottom: 3rem;
 }
 
-.get-ai-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 1rem;
-}
+.get-ai-header h1 { font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+.gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-badge span { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border: 1px solid rgba(102,126,234,0.2); color: #667eea; background: rgba(102,126,234,0.08); border-radius: 999px; font-weight: 600; font-size: 0.85rem; }
 
 .get-ai-header p {
   font-size: 1.125rem;
@@ -90,12 +87,19 @@
   color: #475569;
 }
 
+.upload-hint { display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.9rem; }
+.upload-hint i { color: #f59e0b; }
+
 .preferences-section {
   background: white;
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+
+.panel-header { margin-bottom: 1rem; }
+.panel-header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #111827; }
+.panel-header p { margin: 0.25rem 0 0; color: #6b7280; }
 
 .preferences-grid {
   display: grid;
@@ -137,7 +141,7 @@
 .get-suggestion-btn {
   width: 100%;
   padding: 1rem;
-  background-color: #0ea5e9;
+  background: var(--cg-gradient);
   color: white;
   font-weight: 500;
   border-radius: 0.5rem;
@@ -150,11 +154,7 @@
   gap: 0.5rem;
 }
 
-.get-suggestion-btn:hover:not(.disabled) {
-  background-color: #0284c7;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
-}
+.get-suggestion-btn:hover:not(.disabled) { transform: translateY(-1px); box-shadow: var(--cg-shadow); }
 
 .get-suggestion-btn.disabled {
   background-color: #94a3b8;
@@ -243,7 +243,7 @@
 }
 
 .save-btn {
-  background-color: #0ea5e9;
+  background: var(--cg-gradient);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -257,11 +257,7 @@
   margin: 0 auto;
 }
 
-.save-btn:hover {
-  background-color: #0284c7;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
-}
+.save-btn:hover { transform: translateY(-1px); box-shadow: var(--cg-shadow); }
 
 @media (max-width: 1024px) {
   .get-ai-content {
