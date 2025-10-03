@@ -95,16 +95,22 @@ export default function OutfitGenerator() {
     setOutfitHistory(newHistory);
     localStorage.setItem('outfitHistory', JSON.stringify(newHistory));
     
-    // Fetch AI description via proxy (non-blocking for UI)
+    // Fetch AI description directly from OpenRouter (non-blocking for UI)
     try {
       const prompt = `Create a short, friendly 3-4 sentence description for an outfit with ${outfit.items.length} items for a ${outfit.occasion} occasion in ${outfit.season}. Weather: ${outfit.weather}. Style vibe: ${outfit.styleVibe || 'any'}. Mention key categories and when it works well.`;
-      const resp = await fetch('/api/suggest', {
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        headers: {
+          'Authorization': 'Bearer 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',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3-haiku',
+          messages: [{ role: 'user', content: prompt }]
+        })
       });
       const data = await resp.json();
-      setAiDescription(data.content || "");
+      setAiDescription(data.choices?.[0]?.message?.content || "");
     } catch (err) {
       console.error('AI suggest error:', err);
       setAiDescription("");
