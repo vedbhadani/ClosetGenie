@@ -519,40 +519,44 @@
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-out;
-  padding: 2rem;
+  z-index: 2000;
+  animation: fadeIn 0.25s ease-out;
+  padding: 1.25rem;
 }
 
 .modal-content {
-  background: white;
+  background: #fff;
   border-radius: 16px;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: slideIn 0.3s ease-out;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 920px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.25s ease-out;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 2rem 2rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #edf2f7;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 5;
 }
 
 .modal-title-section h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 0.75rem 0;
@@ -567,9 +571,10 @@
 .meta-tag {
   padding: 0.375rem 0.75rem;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   text-transform: capitalize;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
 
 .meta-tag.occasion {
@@ -618,14 +623,15 @@
 }
 
 .modal-body {
-  padding: 1rem 2rem 2rem;
+  padding: 1rem 1.25rem 1.25rem;
+  overflow-y: auto;
 }
 
 .outfit-showcase {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .showcase-item {
@@ -633,17 +639,17 @@
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .showcase-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .item-image-container {
   position: relative;
-  height: 200px;
+  height: 180px;
   background: white;
 }
 
@@ -709,9 +715,9 @@
 
 .outfit-description {
   background: #f8fafc;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .outfit-description h3 {
@@ -722,9 +728,10 @@
 }
 
 .outfit-description p {
-  color: #6b7280;
-  line-height: 1.6;
+  color: #475569;
+  line-height: 1.65;
   margin: 0;
+  word-break: break-word;
 }
 
 .outfit-actions {
@@ -810,6 +817,7 @@
   .preference-options {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
+  .outfit-showcase { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -836,9 +844,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .outfit-showcase {
-    grid-template-columns: 1fr;
-  }
+  .outfit-showcase { grid-template-columns: 1fr; }
   
   .outfit-actions {
     flex-direction: column;

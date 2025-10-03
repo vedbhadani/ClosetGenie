@@ -23,13 +23,13 @@ function Home() {
             </p>
             <div className="hero-buttons">
               <Link to="/wardrobe" className="btn-primary">
-                Get Started Free
+                Get Started
                 <i className="bi bi-arrow-right"></i>
               </Link>
-              <Link to="/get-ai" className="btn-secondary">
+              <a href="#how-it-works" className="btn-secondary">
                 <i className="bi bi-play-circle"></i>
                 See How It Works
-              </Link>
+              </a>
             </div>
             <div className="hero-stats">
               <div className="stat">
@@ -121,7 +121,7 @@ function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="how-it-works">
+      <section className="how-it-works" id="how-it-works">
         <div className="section-header">
           <h2 className="section-title">How ClosetGenie Works</h2>
           <p className="section-subtitle">
@@ -236,17 +236,13 @@ function Home() {
           </p>
           <div className="cta-buttons">
             <Link to="/wardrobe" className="btn-primary large">
-              Start Your Free Trial
+              Add items to your wardrobe
               <i className="bi bi-arrow-right"></i>
             </Link>
             <Link to="/get-ai" className="btn-outline">
-              Try AI Styling Now
+              Try AI styling now
             </Link>
           </div>
-          <p className="cta-note">
-            <i className="bi bi-shield-check"></i>
-            No credit card required • Free forever plan available
-          </p>
         </div>
       </section>
     </div>
