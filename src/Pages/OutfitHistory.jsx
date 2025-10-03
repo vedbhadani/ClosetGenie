@@ -3,87 +3,200 @@ import './OutfitHistory.css';
 
 function OutfitHistory() {
   const [outfits, setOutfits] = useState([]);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [selectedOutfit, setSelectedOutfit] = useState(null);
 
   useEffect(() => {
     const savedOutfits = JSON.parse(localStorage.getItem('outfitHistory') || '[]');
-    setOutfits(savedOutfits.reverse());
+    // newest first
+    setOutfits([...savedOutfits].reverse());
   }, []);
+
+  const clearAll = () => {
+    localStorage.removeItem('outfitHistory');
+    setOutfits([]);
+  };
 
   const deleteOutfit = (id) => {
     const updatedOutfits = outfits.filter(outfit => outfit.id !== id);
-    localStorage.setItem('outfitHistory', JSON.stringify(updatedOutfits));
+    localStorage.setItem('outfitHistory', JSON.stringify([...updatedOutfits].reverse()));
     setOutfits(updatedOutfits);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const toggleFavorite = (id) => {
+    const updated = outfits.map(o => o.id === id ? { ...o, isFavorite: !o.isFavorite } : o);
+    setOutfits(updated);
+    localStorage.setItem('outfitHistory', JSON.stringify([...updated].reverse()));
   };
 
-  return (
-    <div className="outfit-history">
-      <div className="history-header">
-        <h1>Outfit History</h1>
-        <p>Your saved AI outfit suggestions</p>
-      </div>
+  const formatDate = (dateString) => {
+    const d = new Date(dateString || Date.now());
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
-      <div className="history-container">
-        {outfits.length === 0 ? (
-          <div className="no-history">
+  const visibleOutfits = favoritesOnly ? outfits.filter(o => o.isFavorite) : outfits;
+
+  return (
+    <div className="history-container-modern">
+      <section className="history-header-modern">
+        <div className="header-content">
+          <div>
+            <h1 className="history-title">Outfit History</h1>
+            <p className="history-subtitle">Your previously generated looks and favorites</p>
+          </div>
+          <div className="header-actions">
+            <div className="toggle-favorites">
+              <input id="fav-toggle" type="checkbox" checked={favoritesOnly} onChange={e => setFavoritesOnly(e.target.checked)} />
+              <label htmlFor="fav-toggle">Show favorites only</label>
+            </div>
+            {outfits.length > 0 && (
+              <button className="clear-btn" onClick={clearAll}>
+                <i className="bi bi-trash"></i>
+                Clear All
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="history-stats">
+          <div className="stat-card">
+            <span className="stat-number">{outfits.length}</span>
+            <span className="stat-label">Total Outfits</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{outfits.filter(o => o.isFavorite).length}</span>
+            <span className="stat-label">Favorites</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{new Set(outfits.map(o => o.occasion || o.preferences?.occasion)).size || 0}</span>
+            <span className="stat-label">Occasions</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="history-grid-section">
+        {visibleOutfits.length === 0 ? (
+          <div className="modern-empty">
             <i className="bi bi-clock-history"></i>
-            <p>No outfit suggestions saved yet</p>
-            <span>Your saved suggestions will appear here</span>
+            <h3>No outfits yet</h3>
+            <p>Your generated outfits will show up here. Try creating one from the generator.</p>
           </div>
         ) : (
-          outfits.map(outfit => (
-            <div key={outfit.id} className="history-card">
-              <div className="history-card-header">
-                <div className="history-meta">
-                  <span className="history-date">{formatDate(outfit.date)}</span>
-                  <div className="history-tags">
-                    <span className="tag">{outfit.preferences.occasion}</span>
-                    <span className="tag">{outfit.preferences.weather}</span>
-                    <span className="tag">{outfit.preferences.season}</span>
+          <div className="history-grid">
+            {visibleOutfits.map(outfit => (
+              <div key={outfit.id} className="history-card-modern">
+                <div className="card-header">
+                  <div>
+                    <h3 className="card-title">{outfit.title || 'Generated Outfit'}</h3>
+                    <div className="card-tags">
+                      {outfit.occasion && <span className="tag">{outfit.occasion}</span>}
+                      {outfit.season && <span className="tag">{outfit.season}</span>}
+                      {outfit.weather && <span className="tag">{outfit.weather}</span>}
+                      {outfit.styleVibe && <span className="tag">{outfit.styleVibe}</span>}
+                    </div>
+                  </div>
+                  <div className="card-actions">
+                    <button type="button" className="details" onClick={() => setSelectedOutfit(outfit)} aria-label="View details">
+                      <i className="bi bi-eye"></i>
+                    </button>
+                    <button type="button" className={`favorite ${outfit.isFavorite ? 'active' : ''}`} onClick={() => toggleFavorite(outfit.id)} aria-label="Toggle favorite">
+                      <i className={outfit.isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
+                    </button>
+                    <button type="button" className="delete" onClick={() => deleteOutfit(outfit.id)} aria-label="Delete outfit">
+                      <i className="bi bi-trash"></i>
+                    </button>
                   </div>
                 </div>
-                <button 
-                  className="delete-outfit"
-                  onClick={() => deleteOutfit(outfit.id)}
-                >
-                  <i className="bi bi-trash"></i>
-                </button>
-              </div>
-
-              <div className="history-content">
-                <div className="base-item">
-                  <h3>Base Item</h3>
-                  <p>
-                    <span className="color-dot" style={{ backgroundColor: outfit.baseItem.color }}></span>
-                    {outfit.baseItem.type}
-                  </p>
-                </div>
-
-                <div className="suggestion-content">
-                  <h3>AI Suggestion</h3>
-                  <p>{outfit.suggestion}</p>
-                </div>
-
-                <div className="preferences">
-                  <div className="preference">
-                    <span className="label">Vibe:</span>
-                    <span className="value">{outfit.preferences.vibe}</span>
+                <div className="card-body" role="button" tabIndex={0} onClick={() => setSelectedOutfit(outfit)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedOutfit(outfit); }}>
+                  {(outfit.items && outfit.items.length > 0) ? (
+                    <div className="thumbs">
+                      {outfit.items.slice(0,4).map((item, idx) => (
+                        <div key={idx} className="thumb">
+                          <img src={item.imageUrl} alt={item.name} />
+                          <span className="thumb-badge">{item.category}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    (outfit.suggestion || outfit.baseItem) && (
+                      <div className="legacy-preview">
+                        {outfit.suggestion && (
+                          <p className="preview-suggestion">{outfit.suggestion}</p>
+                        )}
+                        {outfit.baseItem && (
+                          <div className="preview-base">
+                            <span className="color-dot" style={{ backgroundColor: outfit.baseItem.color }}></span>
+                            {outfit.baseItem.type}
+                          </div>
+                        )}
+                        <div className="preview-tags">
+                          { (outfit.preferences?.occasion || outfit.occasion) && (<span className="tag">{outfit.preferences?.occasion || outfit.occasion}</span>) }
+                          { (outfit.preferences?.season || outfit.season) && (<span className="tag">{outfit.preferences?.season || outfit.season}</span>) }
+                          { (outfit.preferences?.weather || outfit.weather) && (<span className="tag">{outfit.preferences?.weather || outfit.weather}</span>) }
+                        </div>
+                      </div>
+                    )
+                  )}
+                  <div className="meta-row">
+                    <span className="date">{formatDate(outfit.createdAt || outfit.date)}</span>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
-      </div>
+      </section>
+
+      {selectedOutfit && (
+        <div className="history-modal-overlay" onClick={() => setSelectedOutfit(null)}>
+          <div className="history-modal" onClick={e => e.stopPropagation()}>
+            <div className="history-modal-header">
+              <div>
+                <h2>{selectedOutfit.title || 'Outfit details'}</h2>
+                <div className="card-tags">
+                  {selectedOutfit.occasion && <span className="tag">{selectedOutfit.occasion}</span>}
+                  {selectedOutfit.season && <span className="tag">{selectedOutfit.season}</span>}
+                  {selectedOutfit.weather && <span className="tag">{selectedOutfit.weather}</span>}
+                  {selectedOutfit.styleVibe && <span className="tag">{selectedOutfit.styleVibe}</span>}
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => setSelectedOutfit(null)} aria-label="Close">
+                <i className="bi bi-x"></i>
+              </button>
+            </div>
+            <div className="history-modal-body">
+              {(selectedOutfit.items && selectedOutfit.items.length > 0) ? (
+                <div className="modal-thumbs">
+                  {selectedOutfit.items.map((item, idx) => (
+                    <div key={idx} className="thumb">
+                      <img src={item.imageUrl} alt={item.name} />
+                      <span className="thumb-badge">{item.category}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="legacy-details">
+                  {selectedOutfit.suggestion && (
+                    <div className="legacy-block">
+                      <h4>AI Suggestion</h4>
+                      <p className="legacy-suggestion">{selectedOutfit.suggestion}</p>
+                    </div>
+                  )}
+                  {selectedOutfit.baseItem && (
+                    <div className="legacy-block">
+                      <h4>Base Item</h4>
+                      <p>
+                        <span className="color-dot" style={{ backgroundColor: selectedOutfit.baseItem.color }}></span>
+                        {selectedOutfit.baseItem.type}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <p className="modal-date">{formatDate(selectedOutfit.createdAt || selectedOutfit.date)}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
