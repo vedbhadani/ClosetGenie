@@ -198,7 +198,7 @@ const GetAI = () => {
         <h1>
           Get <span className="gradient-text">AI Outfit Suggestions</span>
         </h1>
-        <p>Upload a clothing item and let our AI create the perfect outfit for you</p>
+        <p>Upload a clothing item and let the AI suggest a complete look that fits the moment.</p>
       </div>
 
       <div className="get-ai-content">
@@ -214,7 +214,7 @@ const GetAI = () => {
             {!file && (
               <div className="upload-hint">
                 <i className="bi bi-lightbulb"></i>
-                <span>Tip: clearer photos help the AI detect colors more accurately.</span>
+                <span>Tip: clear, well-lit photos help the AI pick colors more accurately.</span>
               </div>
             )}
           </div>

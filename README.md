@@ -1,12 +1,46 @@
-# React + Vite
+## ClosetGenie
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight wardrobe manager and AI outfit helper built with React + Vite. Add your clothes, generate outfits, and keep a history of what you’ve tried and loved.
 
-Currently, two official plugins are available:
+### Features
+- Modern UI with a consistent purple theme
+- Wardrobe management with images, tags, and seasons
+- AI suggestions for outfits (OpenRouter)
+- Outfit generator with quick presets and favorites
+- Outfit history with details and small, glanceable cards
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Quick start
+```bash
+npm install
+npm run dev
+```
+App runs at `http://localhost:5173`.
 
-## Expanding the ESLint configuration
+### Pages
+- Home: Overview and feature highlights
+- Wardrobe: Add and browse items with filters and stats
+- Outfit Generator: Combine items into a styled look; save favorites
+- Outfit History: View, favorite, and inspect previous outfits
+- Get AI Suggestion: Upload an item and get a friendly outfit plan
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### AI setup (optional)
+The app can call OpenRouter directly from the client. If you prefer this quick setup, add your key in the code where the Authorization header is used. For production, consider using a proxy or serverless function to keep keys private.
+
+### Tech
+- React (functional components + hooks)
+- React Router
+- Vite
+- Local Storage for persistence
+- Bootstrap icons
+
+### Scripts
+- `npm run dev` – start Vite dev server
+- `npm run build` – production build
+- `npm run preview` – preview the build locally
+- `npm run lint` – run ESLint
+
+### Contributing
+PRs welcome. Keep the tone friendly, keep UI copy conversational, and prefer small, focused commits.
+
+### License
+MIT
