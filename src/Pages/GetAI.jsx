@@ -194,7 +194,10 @@ const GetAI = () => {
   return (
     <div className="get-ai-container">
       <div className="get-ai-header">
-        <h1>Get AI Outfit Suggestions</h1>
+        <div className="hero-badge"><span>✨ AI Stylist</span></div>
+        <h1>
+          Get <span className="gradient-text">AI Outfit Suggestions</span>
+        </h1>
         <p>Upload a clothing item and let our AI create the perfect outfit for you</p>
       </div>
 
@@ -208,10 +211,20 @@ const GetAI = () => {
                 <span>{clothingType ? `${clothingType}: ${getColorName(dominantColor)}` : `Detected color: ${getColorName(dominantColor)}`}</span>
               </div>
             )}
+            {!file && (
+              <div className="upload-hint">
+                <i className="bi bi-lightbulb"></i>
+                <span>Tip: clearer photos help the AI detect colors more accurately.</span>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="preferences-section">
+          <div className="panel-header">
+            <h2>Style Preferences</h2>
+            <p>Tell us about the occasion and vibe</p>
+          </div>
           <div className="preferences-grid">
             <div className="preference-group">
               <label>Clothing Type</label>
@@ -297,7 +310,10 @@ const GetAI = () => {
                 <span>Getting Suggestions...</span>
               </div>
             ) : (
-              'Get Outfit Suggestions'
+              <>
+                <i className="bi bi-magic"></i>
+                Get Outfit Suggestions
+              </>
             )}
           </button>
         </div>
