@@ -27,3 +27,16 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# AI / Agent tooling (local only)
+.agents/
+.claude/
+.windsurf/
+
+AGENTS.md
+CLAUDE.md
+skills-lock.json
+
+# Convex
+convex/_generated/
+.convex/
