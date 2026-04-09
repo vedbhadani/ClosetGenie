@@ -1,0 +1,25 @@
+.color-extractor {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+}
+
+.color-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.color-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+.color-extractor p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+} 
