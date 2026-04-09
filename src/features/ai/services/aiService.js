@@ -50,18 +50,24 @@ export function useAIService() {
       }
     },
 
-    generateCreativeOutput: async (prompt) => {
-      if (aiCache.has(prompt)) return aiCache.get(prompt);
-      if (!canCallAI()) return "Here is a basic suggestion: A comfortable casual outfit with matching accessories.";
+    generateCreativeOutput: async (prompt, bypassCache = false) => {
+      if (!bypassCache && aiCache.has(prompt)) return aiCache.get(prompt);
+      if (!canCallAI()) throw new Error("Please wait before generating again.");
       
       isCallActive = true;
       try {
         const result = await creativeAI({ prompt });
-        if (result) aiCache.set(prompt, result);
-        return result || "Here is a basic suggestion: A comfortable casual outfit with matching accessories.";
+        
+        // Strict Validation: If it's the backend fallback or not properly formatted
+        if (!result || result.includes("Here is a basic suggestion") || !result.match(/\d+\./)) {
+          throw new Error("AI service returned an invalid format. Please try again.");
+        }
+
+        aiCache.set(prompt, result);
+        return result;
       } catch (err) {
         console.error("Creative AI Error:", err);
-        return "Here is a basic suggestion: A comfortable casual outfit with matching accessories.";
+        throw new Error(err.message || "AI service is busy. Please try again.");
       } finally {
         updateCallTime();
       }
