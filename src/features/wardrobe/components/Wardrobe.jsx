@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import AddItemModal from '@/features/wardrobe/components/AddItemModal';
-import './wardrobe.css';
 import { useQuery, useMutation } from "convex/react";
 import { api } from '@convex/_generated/api';
 import { useUser } from "@clerk/clerk-react";
 import { WardrobeSkeleton } from '@/shared/components/PageSkeleton';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiGrid, FiList, FiClock, FiTag, FiHash, FiGrid as FiCollection } from 'react-icons/fi';
 
 function Wardrobe() {
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -34,10 +34,7 @@ function Wardrobe() {
       if (!userId) return;
       setIsUploading(true);
 
-      // Step 1: Get short-lived upload URL
       const postUrl = await generateUploadUrl();
-
-      // Step 2: POST the file to the URL
       const result = await fetch(postUrl, {
         method: "POST",
         headers: { "Content-Type": newItem.imageFile.type },
@@ -45,7 +42,6 @@ function Wardrobe() {
       });
       const { storageId } = await result.json();
 
-      // Step 3: Save to database
       await addClothingItem({
         userId,
         name: newItem.name,
@@ -89,7 +85,6 @@ function Wardrobe() {
         ...(updatedData.tags && { tags: updatedData.tags }),
       };
 
-      // If a new image was uploaded, store it first
       if (updatedData.imageFile) {
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
@@ -118,12 +113,10 @@ function Wardrobe() {
   const getFilteredItems = () => {
     let filtered = items;
     
-    // Filter by category
     if (activeFilter !== 'All Items') {
       filtered = filtered.filter(item => item.category === activeFilter);
     }
     
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(item => 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -131,22 +124,15 @@ function Wardrobe() {
       );
     }
     
-    // Sort items
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'newest':
-          return b.createdAt - a.createdAt;
-        case 'oldest':
-          return a.createdAt - b.createdAt;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'category':
-          return a.category.localeCompare(b.category);
-        default:
-          return 0;
+        case 'newest': return b.createdAt - a.createdAt;
+        case 'oldest': return a.createdAt - b.createdAt;
+        case 'name': return a.name.localeCompare(b.name);
+        case 'category': return a.category.localeCompare(b.category);
+        default: return 0;
       }
     });
-    
     return filtered;
   };
 
@@ -175,233 +161,190 @@ function Wardrobe() {
   const filteredItems = getFilteredItems();
 
   return (
-    <div className="wardrobe-container">
+    <div className="w-full bg-surface pb-[100px]" style={{ minHeight: "calc(100vh - 76px)" }}>
       {/* Header Section */}
-      <section className="wardrobe-header">
-        <div className="header-content">
-          <div className="header-text">
-            <h1 className="wardrobe-title">My Wardrobe</h1>
-            <p className="wardrobe-subtitle">Organize and manage your clothing collection</p>
+      <section className="px-6 lg:px-12 pt-8 pb-6 max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-on-surface tracking-tight">Wardrobe</h1>
+            <p className="font-body text-sm text-on-surface/60 mt-1">Manage and curate your digital closet.</p>
           </div>
-          <button className="add-item-btn" onClick={() => setShowModal(true)}>
+          <button 
+            onClick={() => setShowModal(true)}
+            disabled={isUploading}
+            className="group flex items-center justify-center gap-2 bg-primary-container text-on-primary px-6 py-3 rounded-md font-body font-semibold text-sm hover:opacity-90 transition shadow-ambient disabled:opacity-50"
+          >
             {isUploading ? (
-              <>
-                <div className="spinner" style={{ width: '1rem', height: '1rem', marginRight: '0.5rem', display: 'inline-block', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                Uploading...
-              </>
+              <span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin flex-shrink-0" />
             ) : (
-              <>
-                <i className="bi bi-plus-lg"></i>
-                Add New Item
-              </>
+              <FiPlus className="group-hover:scale-110 transition-transform" />
             )}
+            {isUploading ? 'Uploading...' : 'Add More Items'}
           </button>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section">
-        <div className="stats-container">
-          <div className="stat-card">
-            <div className="stat-icon gradient-bg-blue">
-              <i className="bi bi-collection"></i>
+      <section className="px-6 lg:px-12 pb-8 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Total Items', value: stats.total, icon: <FiCollection /> },
+            { label: 'Categories', value: stats.categories, icon: <FiHash /> },
+            { label: 'Added This Week', value: stats.recent, icon: <FiClock /> },
+            { label: 'Top Category', value: Object.keys(stats.mostUsedCategory).length > 0 ? Math.max(...Object.values(stats.mostUsedCategory)) : 0, icon: <FiTag /> },
+          ].map((stat, idx) => (
+            <div key={idx} className="bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/30 flex items-center gap-4 shadow-[0_2px_12px_rgba(26,28,28,0.02)]">
+              <div className="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary-container">
+                {stat.icon}
+              </div>
+              <div>
+                <p className="font-display font-semibold text-xl text-on-surface leading-none">{stat.value}</p>
+                <p className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest mt-1">{stat.label}</p>
+              </div>
             </div>
-            <div className="stat-content">
-              <span className="stat-number">{stats.total}</span>
-              <span className="stat-label">Total Items</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon gradient-bg-green">
-              <i className="bi bi-tags"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-number">{stats.categories}</span>
-              <span className="stat-label">Categories</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon gradient-bg-purple">
-              <i className="bi bi-clock-history"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-number">{stats.recent}</span>
-              <span className="stat-label">Added This Week</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon gradient-bg-orange">
-              <i className="bi bi-star"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-number">{Object.keys(stats.mostUsedCategory).length > 0 ? Math.max(...Object.values(stats.mostUsedCategory)) : 0}</span>
-              <span className="stat-label">Most in Category</span>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Controls Section */}
-      <section className="controls-section">
-        <div className="controls-container">
-          <div className="search-controls">
-            <div className="search-box">
-              <i className="bi bi-search"></i>
-              <input
-                type="text"
-                placeholder="Search your wardrobe..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="sort-controls">
-              <select 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value)}
-                className="sort-select"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="name">Name A-Z</option>
-                <option value="category">Category</option>
-              </select>
-            </div>
-            <div className="view-controls">
-              <button 
-                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <i className="bi bi-grid-3x3-gap"></i>
-              </button>
-              <button 
-                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-              >
-                <i className="bi bi-list"></i>
-              </button>
-            </div>
-          </div>
-          
-          <div className="filter-controls">
-            <div className="filter-tabs">
+      {/* Controls & Filters */}
+      <section className="sticky top-0 z-30 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 mb-8">
+        <div className="px-6 lg:px-12 py-4 max-w-[1400px] mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            {/* Filter Pill Chips */}
+            <div className="w-full md:w-auto flex overflow-x-auto hide-scrollbar gap-2 pb-2 md:pb-0" role="group" aria-label="Filter categories">
               {['All Items', 'Tops', 'Bottoms', 'Footwear', 'Outerwear', 'Accessories'].map((category) => (
                 <button
                   key={category}
-                  className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
                   onClick={() => setActiveFilter(category)}
+                  aria-pressed={activeFilter === category}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full font-label text-xs uppercase tracking-wider transition-colors ${
+                    activeFilter === category 
+                      ? 'bg-secondary-container text-on-secondary-container font-semibold' 
+                      : 'bg-surface-container-high text-on-surface/60 hover:text-on-surface'
+                  }`}
                 >
-                  <span className="tab-text">{category}</span>
-                  <span className="tab-count">
-                    {category === 'All Items' 
-                      ? items.length 
-                      : items.filter(item => item.category === category).length}
+                  {category} <span className="ml-1 opacity-60">
+                    ({category === 'All Items' ? items.length : items.filter(i => i.category === category).length})
                   </span>
                 </button>
               ))}
             </div>
+
+            {/* View Config */}
+            <div className="w-full md:w-auto flex items-center gap-4 justify-between md:justify-end">
+              <div className="relative flex-grow md:flex-grow-0">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface/40" />
+                <input
+                  type="text"
+                  placeholder="Search closet..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full md:w-48 pl-9 pr-4 py-2 bg-transparent border-b border-outline-variant/40 outline-none focus:border-primary-container font-body text-sm transition-colors"
+                />
+              </div>
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent border-b border-outline-variant/40 font-body text-sm py-2 outline-none focus:border-primary-container"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name">Name A-Z</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* Items Section */}
-      <section className="items-section">
-        <div className="items-container">
-          <div className="items-header">
-            <h2 className="items-title">
-              {activeFilter === 'All Items' ? 'All Items' : activeFilter}
-              <span className="items-count">({filteredItems.length})</span>
-            </h2>
-          </div>
-
-          {filteredItems.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <i className="bi bi-inbox"></i>
-              </div>
-              <h3>No items found</h3>
-              <p>
-                {items.length === 0 
-                  ? "Start building your digital wardrobe by adding your first clothing item!"
-                  : searchQuery 
-                    ? `No items match "${searchQuery}". Try a different search term.`
-                    : `No items in ${activeFilter}. Try a different category or add some items.`
-                }
-              </p>
-              {items.length === 0 && (
-                <button className="empty-cta-btn" onClick={() => setShowModal(true)}>
-                  <i className="bi bi-plus-lg"></i>
-                  Add Your First Item
-                </button>
-              )}
+      {/* Grid Iteration */}
+      <section className="px-6 lg:px-12 max-w-[1400px] mx-auto">
+        {filteredItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface/40 mb-4">
+              <FiGrid size={24} />
             </div>
-          ) : (
-            <div className={`items-grid ${viewMode}`}>
-              {filteredItems.map(item => (
-                <div key={item._id} className="item-card">
-                  <div className="item-image-container">
-                    <img src={item.imageUrl} alt={item.name} className="item-image" />
-                    <div className="item-overlay">
-                      <div className="item-actions">
-                        <button 
-                          className="action-btn edit-btn"
-                          onClick={() => handleEditItem(item)}
-                          aria-label="Edit item"
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button 
-                          className="action-btn delete-btn"
-                          onClick={() => handleDeleteItem(item._id)}
-                          aria-label="Delete item"
-
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="item-content">
-                    <h3 className="item-name">{item.name}</h3>
-                    <div className="item-meta">
-                      <div className="item-category">
-                        <span className={`category-dot ${item.category.toLowerCase()}`}></span>
-                        <span>{item.category}</span>
-                      </div>
-                      <div className="item-seasons">
-                        {item.color && (
-                          <span className="season-tag color-tag" style={{ textTransform: 'capitalize' }}>
-                            {item.color}
-                          </span>
-                        )}
-                        {item.seasons.slice(0, 2).map(season => (
-                          <span key={season} className="season-tag">{season}</span>
-                        ))}
-                        {item.seasons.length > 2 && (
-                          <span className="season-tag more">+{item.seasons.length - 2}</span>
-                        )}
-                      </div>
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="item-seasons" style={{ marginTop: '0.25rem' }}>
-                          {item.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="season-tag" style={{ background: 'rgba(139,92,246,0.1)', color: '#7c3aed', border: '1px solid rgba(139,92,246,0.15)' }}>{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+            <h3 className="font-display font-semibold text-xl mb-1">Archive is empty</h3>
+            <p className="font-body text-sm text-on-surface/50 max-w-sm mb-6">
+              {searchQuery ? `No items match "${searchQuery}".` : `No items in ${activeFilter}. Add your first piece to begin.`}
+            </p>
+            {items.length === 0 && (
+              <button 
+                onClick={() => setShowModal(true)}
+                className="text-sm font-semibold border-b-2 border-primary-container pb-1 text-primary-container"
+              >
+                Add Your First Item
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            {filteredItems.map(item => (
+              <div key={item._id} className="group flex flex-col bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm hover:border-outline-variant/60 transition-colors">
+                <div className="relative aspect-[4/5] bg-surface-container-low flex items-center justify-center border-b border-outline-variant/10">
+                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
+                  
+                  {/* Subtle actions overlay */}
+                  <div className="absolute inset-0 bg-surface/40 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm flex items-center justify-center gap-3">
+                    <button 
+                      onClick={() => handleEditItem(item)}
+                      className="w-10 h-10 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center hover:scale-105 transition-transform shadow-ambient"
+                      aria-label="Edit item"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteItem(item._id)}
+                      className="w-10 h-10 rounded-full bg-error text-on-error flex items-center justify-center hover:scale-105 transition-transform shadow-ambient"
+                      aria-label="Delete item"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                
+                <div className="flex flex-col gap-1 p-3">
+                  <h3 className="font-body font-semibold text-sm line-clamp-1">{item.name}</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest">{item.category}</span>
+                    {item.color && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-outline-variant/50" />
+                        <span className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest">{item.color}</span>
+                      </>
+                    )}
+                  </div>
+                  {(item.seasons || item.tags) && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {item.seasons?.slice(0, 2).map((season) => (
+                        <span key={season} className="px-2 py-0.5 bg-surface-container-high rounded-full font-label text-[9px] uppercase tracking-wider text-on-surface/70">
+                          {season}
+                        </span>
+                      ))}
+                      {item.tags?.slice(0, 1).map((tag) => (
+                        <span key={tag} className="px-2 py-0.5 bg-secondary-container/50 rounded-full font-label text-[9px] uppercase tracking-wider text-on-secondary-container">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Quick Actions Floating Button */}
-      <div className="floating-actions">
-        <button className="fab-main" onClick={() => setShowModal(true)}>
-          <i className="bi bi-plus"></i>
-        </button>
-      </div>
+      {/* Floating Action Button (Mobile) */}
+      <button 
+        onClick={() => setShowModal(true)}
+        className="md:hidden fixed bottom-[90px] right-6 w-14 h-14 bg-primary-container text-on-primary rounded-full shadow-ambient flex items-center justify-center z-40 active:scale-95 transition-transform"
+        aria-label="Add item"
+      >
+        <FiPlus size={24} />
+      </button>
 
       {showModal && (
         <AddItemModal 
@@ -410,11 +353,13 @@ function Wardrobe() {
           editItem={editingItem}
         />
       )}
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </div>
   )
 }
 
 export default Wardrobe
-
-
-

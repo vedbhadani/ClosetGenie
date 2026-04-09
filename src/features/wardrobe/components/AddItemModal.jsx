@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
-import './AddItemModal.css'
 import { useAIService } from '@/features/ai/services/aiService';
 import { useMutation } from 'convex/react';
 import { api } from '@convex/_generated/api';
+import { FiX, FiUploadCloud, FiStar, FiAlertCircle, FiTag } from 'react-icons/fi';
 
 const AddItemModal = ({ onClose, onAdd, editItem }) => {
   const [image, setImage] = useState(null);
@@ -25,6 +25,14 @@ const AddItemModal = ({ onClose, onAdd, editItem }) => {
   const analysisRunRef = useRef(null); // prevent duplicate calls
   const aiService = useAIService();
   const generateUploadUrl = useMutation(api.wardrobe.generateUploadUrl);
+
+  // Lock background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const handleImageUpload = (file) => {
     if (file && file.type.startsWith('image/')) {
@@ -100,12 +108,12 @@ const AddItemModal = ({ onClose, onAdd, editItem }) => {
 
   const handleDragEnter = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
+    e.currentTarget.classList.add('ring-2', 'ring-primary-container');
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
+    e.currentTarget.classList.remove('ring-2', 'ring-primary-container');
   };
 
   const handleFileInputChange = (e) => {
@@ -124,7 +132,7 @@ const AddItemModal = ({ onClose, onAdd, editItem }) => {
     setImage(null);
     setPreviewUrl(null);
     setAiDetected(false);
-    setAiError(false);
+    setHasAiError(false);
     setAiTags([]);
     analysisRunRef.current = null;
     if (fileInputRef.current) {
@@ -188,152 +196,179 @@ const AddItemModal = ({ onClose, onAdd, editItem }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{editItem ? 'Edit Item' : 'Add New Item'}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-[env(safe-area-inset-bottom)]">
+      {/* Stable backdrop — will-change prevents blur repaint on state updates */}
+      <div className="absolute inset-0 bg-on-surface/20 backdrop-blur-md" style={{ willChange: 'transform' }} onClick={onClose}></div>
+      
+      <div className="relative w-full max-w-lg max-h-[90vh] bg-surface-container-lowest rounded-2xl shadow-ambient flex flex-col" onClick={e => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 flex justify-between items-center z-10 rounded-t-2xl">
+          <h2 className="font-display font-bold text-lg">{editItem ? 'Edit Item' : 'Add New Item'}</h2>
+          <button className="p-2 -mr-2 rounded-full hover:bg-surface-container-low transition" onClick={onClose}>
+            <FiX />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-content">
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-6 hide-scrollbar">
+          
+          {/* Uploader */}
           <div 
-            className={`image-upload-area ${previewUrl ? 'has-image' : ''}`}
+            className={`w-full h-48 border-2 border-dashed rounded-xl overflow-hidden cursor-pointer relative transition group flex flex-col items-center justify-center
+              ${previewUrl ? 'border-transparent bg-surface-container-high' : 'border-outline-variant/50 hover:border-primary-container bg-surface-container-low/50 hover:bg-surface-container-low'}
+            `}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
-            onClick={handleUploadClick}>
-            
+            onClick={handleUploadClick}
+          >
             {previewUrl ? (
-              <div className="preview-container">
-                <img src={previewUrl} alt="Preview" className="preview-image" />
-
-                {/* AI analysis overlay */}
+              <div className="w-full h-full relative border border-outline-variant/10 rounded-xl overflow-hidden bg-surface-container-lowest">
+                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                
                 {isAnalyzing && (
-                  <div className="ai-overlay">
-                    <div className="ai-spinner"></div>
-                    <span style={{textAlign: "center", padding: "0 10px"}}>Analyzing image...<br/><small>(Using free AI, may take a moment)</small></span>
+                  <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <span className="w-6 h-6 border-2 border-primary-container/30 border-t-primary-container rounded-full animate-spin mb-3" />
+                    <span className="font-body text-xs text-on-surface text-center px-4">
+                      Analyzing via AI...<br/>
+                      <span className="opacity-60 text-[10px]">Autofilling details automatically</span>
+                    </span>
                   </div>
                 )}
-           
+
                 <button 
                   type="button"
-                  className="remove-image"
+                  className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-surface-container-lowest/80 backdrop-blur text-on-surface rounded-full shadow-sm hover:bg-error hover:text-on-error transition"
                   onClick={handleRemoveImage}
-                  aria-label="Remove image"
                 >
-                  ×
+                  <FiX />
                 </button>
               </div>
             ) : (
-              <div className="upload-placeholder">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p>Drag & drop your image here</p>
-                <span>or click to browse files</span>
+              <div className="text-center p-4">
+                <FiUploadCloud className="mx-auto text-on-surface/40 mb-3" size={32} />
+                <p className="font-body font-semibold text-sm text-on-surface/70">Drag & drop your image here</p>
+                <span className="font-label text-xs uppercase tracking-wider text-on-surface/40">or click to browse files</span>
               </div>
             )}
             <input
               ref={fileInputRef}
               type="file"
-              className="hidden-input"
+              className="hidden"
               accept="image/*"
               onChange={handleFileInputChange}
               onClick={e => e.stopPropagation()}
             />
           </div>
 
-          {/* AI Status Badge */}
+          {/* AI Notice Badges */}
           {aiDetected && (
-            <div className="ai-badge detected">
-              <i className="bi bi-stars"></i>
-              <span>AI auto-filled fields — feel free to edit</span>
+            <div className="flex items-center gap-2 p-3 bg-secondary-container/30 border border-secondary-container/50 text-on-secondary-container rounded-lg font-body text-xs">
+              <FiStar /> AI auto-filled fields. Please verify.
             </div>
           )}
-          {aiError && (
-            <div className="ai-badge error">
-              <i className="bi bi-exclamation-circle"></i>
-              <span>AI analysis failed — fill in manually</span>
+          {(aiError || hasAiError) && (
+            <div className="flex items-center gap-2 p-3 bg-error-container/30 border border-error-container/50 text-error rounded-lg font-body text-xs">
+              <FiAlertCircle /> AI analysis failed, fill manually.
             </div>
           )}
 
-          <input 
-            type="text"
-            name="name"
-            className="item-input"
-            placeholder="e.g., Blue Denim Jacket"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-          />
+          {/* Core Form Fields */}
+          <div className="flex flex-col gap-4">
+            
+            <div>
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-1 block">Item Name</label>
+              <input 
+                type="text"
+                name="name"
+                className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body text-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition"
+                placeholder="e.g., Blue Denim Jacket"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
 
-          <div className="form-row">
-            <select 
-              name="category"
-              className="item-select"
-              value={formData.category}
-              onChange={handleInputChange}
-            >
-              <option value="Tops">Tops</option>
-              <option value="Bottoms">Bottoms</option>
-              <option value="Footwear">Footwear</option>
-              <option value="Outerwear">Outerwear</option>
-              <option value="Accessories">Accessories</option>
-            </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-1 block">Category</label>
+                <select 
+                  name="category"
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body text-sm focus:outline-none focus:border-primary-container transition appearance-none"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                >
+                  <option value="Tops">Tops</option>
+                  <option value="Bottoms">Bottoms</option>
+                  <option value="Footwear">Footwear</option>
+                  <option value="Outerwear">Outerwear</option>
+                  <option value="Accessories">Accessories</option>
+                </select>
+              </div>
 
-            <input
-              type="text"
-              name="color"
-              className="item-input color-input"
-              placeholder="Color (e.g., blue)"
-              value={formData.color}
-              onChange={handleInputChange}
-            />
+              <div>
+                 <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-1 block">Color</label>
+                 <input
+                  type="text"
+                  name="color"
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body text-sm focus:outline-none focus:border-primary-container transition"
+                  placeholder="e.g., Navy"
+                  value={formData.color}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+             <div>
+                <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-1 block">Material</label>
+                <select 
+                  name="material"
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body text-sm focus:outline-none focus:border-primary-container transition appearance-none"
+                  value={formData.material}
+                  onChange={handleInputChange}
+                >
+                  <option value="Cotton">Cotton</option>
+                  <option value="Wool">Wool</option>
+                  <option value="Polyester">Polyester</option>
+                  <option value="Leather">Leather</option>
+                </select>
+            </div>
           </div>
-
-          <select 
-            name="material"
-            className="item-select"
-            value={formData.material}
-            onChange={handleInputChange}
-          >
-            <option value="Cotton">Cotton</option>
-            <option value="Wool">Wool</option>
-            <option value="Polyester">Polyester</option>
-            <option value="Leather">Leather</option>
-          </select>
 
           {/* AI Style Tags */}
           {aiTags.length > 0 && (
-            <div className="tags-section">
-              <span className="tags-label">
-                <i className="bi bi-tags"></i> Style Tags
-              </span>
-              <div className="tags-list">
+            <div>
+              <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-2 flex items-center gap-1"><FiTag /> Style Tags</label>
+              <div className="flex flex-wrap gap-2">
                 {aiTags.map(tag => (
-                  <span key={tag} className="style-tag">
+                  <span key={tag} className="flex items-center gap-1 font-label text-[10px] uppercase tracking-wider bg-surface-container-high px-3 py-1.5 rounded-md text-on-surface/80">
                     {tag}
                     <button
                       type="button"
-                      className="tag-remove"
+                      className="ml-1 text-on-surface/50 hover:text-error transition"
                       onClick={() => handleRemoveTag(tag)}
-                      aria-label={`Remove ${tag}`}
-                    >×</button>
+                    ><FiX size={12} /></button>
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="seasons-section">
-            <span>Seasons</span>
-            <div className="season-buttons">
+          {/* Seasons (Required) */}
+          <div>
+            <label className="font-label text-[10px] uppercase tracking-widest text-on-surface/50 ml-1 mb-2 block">Seasons</label>
+            <div className="flex flex-wrap gap-2">
               {['Spring', 'Summer', 'Fall', 'Winter', 'All'].map((season) => (
                 <button
                   key={season}
                   type="button"
-                  className={`season-btn ${selectedSeasons.includes(season) ? 'active' : ''}`}
+                  className={`px-4 py-2 rounded-full font-label text-xs uppercase tracking-wider transition border ${
+                    selectedSeasons.includes(season)
+                      ? 'bg-secondary-container text-on-secondary-container border-secondary-container font-semibold'
+                      : 'bg-surface-container-lowest text-on-surface border-outline-variant/30 hover:border-primary-container/30'
+                  }`}
                   onClick={() => handleSeasonClick(season)}
                 >
                   {season}
@@ -342,18 +377,29 @@ const AddItemModal = ({ onClose, onAdd, editItem }) => {
             </div>
           </div>
 
-          <div className="modal-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button 
-              type="submit" 
-              className="add-btn"
-              disabled={!formData.name || (!image && !editItem) || selectedSeasons.length === 0}
-            >
-              {editItem ? 'Save Changes' : 'Add to Wardrobe'}
-            </button>
-          </div>
         </form>
+
+        {/* Footer Actions */}
+        <div className="border-t border-outline-variant/20 p-4 bg-surface-container-lowest flex justify-end gap-3 rounded-b-2xl">
+           <button type="button" className="px-5 py-2.5 font-label text-xs uppercase tracking-wider text-on-surface/60 hover:text-on-surface hover:bg-surface-container-low rounded-lg transition" onClick={onClose}>
+             Cancel
+           </button>
+           <button 
+             type="submit" 
+             onClick={handleSubmit}
+             disabled={!formData.name || (!image && !editItem) || selectedSeasons.length === 0}
+             className="px-6 py-2.5 bg-primary-container text-on-primary font-body font-semibold text-sm rounded-lg hover:opacity-90 disabled:opacity-50 transition shadow-sm"
+           >
+             {editItem ? 'Save Changes' : 'Add to Wardrobe'}
+           </button>
+        </div>
+
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </div>
   )
 }
