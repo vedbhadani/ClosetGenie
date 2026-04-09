@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import './OutfitPlanner.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
 import { PlannerSkeleton } from '@/shared/components/PageSkeleton';
+import { FiChevronLeft, FiChevronRight, FiCalendar, FiX, FiCheck, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function OutfitPlanner() {
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -51,15 +51,9 @@ export default function OutfitPlanner() {
   };
 
   // ── Navigation ──
-  const prevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-  const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
-  const goToToday = () => {
-    setCurrentDate(new Date());
-  };
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const goToToday = () => setCurrentDate(new Date());
 
   // ── Actions ──
   const handleDateClick = (day) => {
@@ -81,7 +75,7 @@ export default function OutfitPlanner() {
   const calendarCells = [];
   // Empty cells for offset
   for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarCells.push(<div key={`empty-${i}`} className="calendar-cell empty"></div>);
+    calendarCells.push(<div key={`empty-${i}`} className="min-h-[80px] p-2 bg-surface-container-low/30 rounded-lg"></div>);
   }
   // Day cells
   for (let day = 1; day <= daysInMonth; day++) {
@@ -94,26 +88,36 @@ export default function OutfitPlanner() {
     calendarCells.push(
       <div
         key={day}
-        className={`calendar-cell day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasPlan ? 'has-plan' : ''}`}
         onClick={() => handleDateClick(day)}
+        className={`min-h-[80px] p-2 md:p-3 rounded-lg border transition cursor-pointer flex flex-col justify-between ${
+          isToday 
+            ? 'border-primary-container bg-primary-container/5' 
+            : 'border-outline-variant/30 bg-surface-container-lowest hover:border-primary-container/50'
+        } ${isSelected ? 'ring-2 ring-primary-container ring-offset-2 ring-offset-surface' : ''}`}
       >
-        <span className="day-number">{day}</span>
+        <span className={`font-display font-semibold text-sm ${isToday ? 'text-primary-container' : 'text-on-surface'}`}>
+          {day}
+        </span>
+        
         {hasPlan && (
-          <div className="plan-indicators">
+          <div className="flex -space-x-2 mt-2">
             {plans.slice(0, 3).map((plan, idx) => {
               const firstItem = plan.outfit?.items?.[0];
               return firstItem?.imageUrl ? (
                 <img
                   key={idx}
                   src={firstItem.imageUrl}
-                  alt=""
-                  className="plan-thumb"
+                  className="w-6 h-6 rounded-full border-2 border-surface-container-lowest object-cover"
                 />
               ) : (
-                <div key={idx} className="plan-dot"></div>
+                <div key={idx} className="w-6 h-6 rounded-full border-2 border-surface-container-lowest bg-secondary-container"></div>
               );
             })}
-            {plans.length > 3 && <span className="plan-more">+{plans.length - 3}</span>}
+            {plans.length > 3 && (
+              <div className="w-6 h-6 rounded-full border-2 border-surface-container-lowest bg-surface-container-high flex items-center justify-center">
+                <span className="text-[8px] font-bold">+{plans.length - 3}</span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -126,100 +130,114 @@ export default function OutfitPlanner() {
     ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
     : '';
 
-  // Outfits available to assign (exclude already-planned ones for that date)
   const alreadyPlannedIds = new Set(selectedPlans.map(p => p.outfitId));
   const availableOutfits = outfitHistory.filter(o => !alreadyPlannedIds.has(o._id));
 
   return (
-    <div className="planner-container">
+    <div className="w-full bg-surface pb-[90px] lg:pb-12 min-h-screen">
+      
       {/* Header */}
-      <section className="planner-header">
-        <div className="header-content">
-          <div className="header-text">
-            <h1 className="planner-title">Outfit Planner</h1>
-            <p className="planner-subtitle">Plan your outfits for the days ahead</p>
+      <section className="px-6 lg:px-12 pt-10 pb-6 max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <h1 className="font-display text-4xl font-bold text-on-surface tracking-tight leading-[1.1]">Planner</h1>
+            <p className="font-body text-sm text-on-surface/60 mt-2 max-w-sm">Schedule your curated looks for the upcoming weeks.</p>
           </div>
-          <div className="header-stats">
-            <div className="stat-item">
-              <span className="stat-number">{plannedOutfits.length}</span>
-              <span className="stat-label">Planned</span>
+          
+          <div className="flex gap-4 p-4 rounded-lg bg-surface-container-low border border-outline-variant/30">
+            <div>
+              <p className="font-display font-bold text-xl leading-none">{plannedOutfits.length}</p>
+              <p className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest mt-1">Scheduled</p>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">{outfitHistory.length}</span>
-              <span className="stat-label">Available Outfits</span>
+            <div className="w-px bg-outline-variant/50"></div>
+            <div>
+              <p className="font-display font-bold text-xl leading-none">{outfitHistory.length}</p>
+              <p className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest mt-1">Available</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Calendar */}
-      <section className="calendar-section">
-        <div className="calendar-nav">
-          <button className="nav-btn" onClick={prevMonth}>
-            <i className="bi bi-chevron-left"></i>
-          </button>
-          <div className="calendar-title">
-            <h2>{monthNames[month]} {year}</h2>
-            <button className="today-btn" onClick={goToToday}>Today</button>
+      {/* Calendar View */}
+      <section className="px-6 lg:px-12 max-w-[1400px] mx-auto mt-4">
+        
+        {/* Calendar Nav */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <h2 className="font-display font-bold text-2xl">{monthNames[month]} {year}</h2>
+            <button 
+              onClick={goToToday}
+              className="px-3 py-1 rounded-full bg-secondary-container/50 text-on-secondary-container font-label text-xs uppercase tracking-wider hover:bg-secondary-container transition"
+            >
+              Today
+            </button>
           </div>
-          <button className="nav-btn" onClick={nextMonth}>
-            <i className="bi bi-chevron-right"></i>
-          </button>
+          <div className="flex gap-2">
+            <button onClick={prevMonth} className="p-2 rounded-full border border-outline-variant/50 hover:bg-surface-container-low transition">
+              <FiChevronLeft />
+            </button>
+            <button onClick={nextMonth} className="p-2 rounded-full border border-outline-variant/50 hover:bg-surface-container-low transition">
+              <FiChevronRight />
+            </button>
+          </div>
         </div>
 
-        <div className="calendar-grid">
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 gap-2 lg:gap-4">
           {dayNames.map(d => (
-            <div key={d} className="calendar-cell header">{d}</div>
+            <div key={d} className="font-label text-xs uppercase tracking-wider text-on-surface/50 text-center pb-2">
+              {d}
+            </div>
           ))}
           {calendarCells}
         </div>
       </section>
 
-      {/* Modal */}
+      {/* Modal Overlay */}
       {showModal && selectedDate && (
-        <div className="planner-modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="planner-modal" onClick={e => e.stopPropagation()}>
-            <div className="planner-modal-header">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pb-safe">
+          <div className="absolute inset-0 bg-on-surface/20 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+          
+          <div className="relative w-full max-w-2xl max-h-[90vh] bg-surface-container-lowest rounded-2xl shadow-ambient overflow-y-auto hide-scrollbar flex flex-col">
+            
+            <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 flex justify-between items-center z-10">
               <div>
-                <h2>{formattedSelectedDate}</h2>
-                <p className="modal-subtitle">{selectedPlans.length} outfit(s) planned</p>
+                <h2 className="font-display font-bold text-lg">{formattedSelectedDate}</h2>
+                <p className="font-label text-[10px] uppercase tracking-wider text-primary-container mt-1">{selectedPlans.length} Outfit(s) Planned</p>
               </div>
-              <button className="modal-close" onClick={() => setShowModal(false)} aria-label="Close">
-                <i className="bi bi-x-lg"></i>
+              <button onClick={() => setShowModal(false)} className="p-2 -mr-2 rounded-full hover:bg-surface-container-low transition">
+                <FiX />
               </button>
             </div>
 
-            <div className="planner-modal-body">
-              {/* Existing plans for this date */}
+            <div className="p-6 flex flex-col gap-8">
+              
+              {/* Existing Plans */}
               {selectedPlans.length > 0 && (
-                <div className="planned-section">
-                  <h3>Planned Outfits</h3>
-                  <div className="planned-list">
+                <div>
+                  <h3 className="font-display font-semibold text-sm mb-4 uppercase tracking-widest text-on-surface/80 flex items-center gap-2">
+                    <span className="w-4 h-[1px] bg-outline-variant"></span> Scheduled For Today
+                  </h3>
+                  <div className="flex flex-col gap-3">
                     {selectedPlans.map(plan => (
-                      <div key={plan._id} className="planned-card">
-                        <div className="planned-card-images">
+                      <div key={plan._id} className="flex items-center gap-4 p-3 pr-4 rounded-xl border border-primary-container/20 bg-primary-container/5">
+                        <div className="flex -space-x-3 w-20 shrink-0">
                           {plan.outfit?.items?.slice(0, 3).map((item, idx) => (
-                            <img key={idx} src={item.imageUrl} alt={item.name} />
+                            <img key={idx} src={item.imageUrl} className="w-10 h-10 rounded-full border-2 border-surface-container-lowest object-cover" />
                           ))}
-                          {(!plan.outfit?.items || plan.outfit.items.length === 0) && (
-                            <div className="planned-placeholder">
-                              <i className="bi bi-hanger"></i>
-                            </div>
-                          )}
                         </div>
-                        <div className="planned-card-info">
-                          <h4>{plan.outfit?.title || 'Outfit'}</h4>
-                          <div className="planned-tags">
-                            {plan.outfit?.occasion && <span className="tag">{plan.outfit.occasion}</span>}
-                            {plan.outfit?.season && <span className="tag">{plan.outfit.season}</span>}
+                        <div className="flex-grow">
+                          <p className="font-body font-semibold text-sm">{plan.outfit?.title || 'Outfit'}</p>
+                          <div className="flex gap-2 mt-1">
+                            {plan.outfit?.occasion && <span className="font-label text-[9px] uppercase tracking-wider text-on-surface/60">{plan.outfit.occasion}</span>}
+                            {plan.outfit?.season && <span className="font-label text-[9px] uppercase tracking-wider text-on-surface/60">{plan.outfit.season}</span>}
                           </div>
                         </div>
-                        <button
-                          className="remove-plan-btn"
+                        <button 
                           onClick={() => handleDeletePlan(plan._id)}
-                          aria-label="Remove plan"
+                          className="p-2 text-on-surface/40 hover:text-error hover:bg-error/10 rounded-full transition"
                         >
-                          <i className="bi bi-trash"></i>
+                          <FiTrash2 />
                         </button>
                       </div>
                     ))}
@@ -227,51 +245,57 @@ export default function OutfitPlanner() {
                 </div>
               )}
 
-              {/* Assign new outfit */}
-              <div className="assign-section">
-                <h3>Add an Outfit</h3>
+              {/* Assign New Outfit */}
+              <div>
+                <h3 className="font-display font-semibold text-sm mb-4 uppercase tracking-widest text-on-surface/80 flex items-center gap-2">
+                  <span className="w-4 h-[1px] bg-outline-variant"></span> Add Saved Outfit
+                </h3>
+                
                 {availableOutfits.length === 0 ? (
-                  <div className="empty-outfits">
-                    <i className="bi bi-emoji-frown"></i>
-                    <p>No outfits available. Generate some from the Outfit Generator first!</p>
+                  <div className="p-6 bg-surface-container-low rounded-xl text-center">
+                    <FiCalendar className="mx-auto text-on-surface/40 mb-2" size={24} />
+                    <p className="font-body text-sm text-on-surface/60">No available outfits to schedule.</p>
                   </div>
                 ) : (
-                  <div className="assign-list">
-                    {availableOutfits.map(outfit => (
-                      <div
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {availableOutfits.map((outfit) => (
+                      <div 
                         key={outfit._id}
-                        className="assign-card"
                         onClick={() => handleAssignOutfit(outfit._id)}
+                        className="group flex gap-3 p-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-primary-container/50 hover:bg-surface-container-low transition cursor-pointer"
                       >
-                        <div className="assign-card-images">
-                          {outfit.items?.slice(0, 3).map((item, idx) => (
-                            <img key={idx} src={item.imageUrl} alt={item.name} />
-                          ))}
-                          {(!outfit.items || outfit.items.length === 0) && (
-                            <div className="assign-placeholder">
-                              <i className="bi bi-hanger"></i>
-                            </div>
-                          )}
+                        <div className="w-16 h-16 rounded-lg bg-surface-container-high flex overflow-hidden shrink-0 shadow-sm relative">
+                           {outfit.items?.slice(0, 2).map((item, idx) => (
+                              <img key={idx} src={item.imageUrl} className="w-full h-full object-cover mix-blend-multiply" />
+                           ))}
+                           <div className="absolute inset-0 bg-primary-container/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <div className="w-6 h-6 rounded-full bg-primary-container text-on-primary flex flex-col justify-center items-center">
+                                <FiPlus size={14} />
+                              </div>
+                           </div>
                         </div>
-                        <div className="assign-card-info">
-                          <h4>{outfit.title || 'Outfit'}</h4>
-                          <div className="assign-tags">
-                            {outfit.occasion && <span className="tag">{outfit.occasion}</span>}
-                            {outfit.season && <span className="tag">{outfit.season}</span>}
+                        <div className="flex flex-col justify-center">
+                          <p className="font-body font-semibold text-xs line-clamp-1">{outfit.title || 'Outfit'}</p>
+                          <div className="flex gap-2 mt-1">
+                            {outfit.occasion && <span className="font-label text-[8px] uppercase tracking-wider text-on-surface/60">{outfit.occasion}</span>}
                           </div>
-                        </div>
-                        <div className="assign-action">
-                          <i className="bi bi-plus-circle-fill"></i>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
             </div>
           </div>
         </div>
       )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-bottom); }
+      `}} />
     </div>
   );
 }

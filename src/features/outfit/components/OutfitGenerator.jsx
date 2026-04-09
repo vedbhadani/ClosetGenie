@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import './OutfitGenerator.css';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '@convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
 import useWeather from '@/features/weather/hooks/useWeather';
 import { GeneratorSkeleton } from '@/shared/components/PageSkeleton';
+import { FiCloud, FiSun, FiWind, FiUmbrella, FiThermometer, FiCalendar, FiHeart, FiRefreshCcw, FiShare, FiDownload, FiX } from 'react-icons/fi';
 
 export default function OutfitGenerator() {
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -161,334 +161,257 @@ export default function OutfitGenerator() {
   };
 
   return (
-    <div className="generator-container">
-      {/* Header Section */}
-      <section className="generator-header">
-        <div className="header-content">
-          <div className="header-text">
-            <h1 className="generator-title">AI Outfit Generator</h1>
-            <p className="generator-subtitle">
-              Create perfect outfit combinations with AI-powered styling based on your wardrobe, preferences, and the occasion
-            </p>
-          </div>
-          <div className="header-stats">
-            <div className="stat-item">
-              <span className="stat-number">{wardrobeItems.length}</span>
-              <span className="stat-label">Wardrobe Items</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{outfitHistory.length}</span>
-              <span className="stat-label">Outfits Generated</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{favoriteOutfits.length}</span>
-              <span className="stat-label">Favorites</span>
-            </div>
-          </div>
+    <div className="w-full bg-surface overflow-y-hidden overflow-x-hidden" style={{ height: "calc(100vh - 76px)" }}>
+      {/* Header */}
+      <section className="px-6 lg:px-12 pt-10 pb-4 max-w-[1400px] mx-auto">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-4xl font-bold text-on-surface tracking-tight leading-[1.1]">Outfit Builder</h1>
+          <p className="font-body text-sm text-on-surface/60 max-w-sm">Curate perfect combinations using AI styling logic connected directly to your archive.</p>
         </div>
       </section>
 
-      <div className="generator-content">
-        <div className="main-content">
-          {/* Preferences Panel */}
-          <div className="preferences-panel">
-            <div className="panel-header">
-              <h2>Style Preferences</h2>
-              <p>Tell us about your style and occasion</p>
-            </div>
+      <main className="px-6 lg:px-12 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 mt-6">
+        
+        {/* Builder Canvas (Left) */}
+        <div className="lg:col-span-7 flex flex-col gap-8">
 
-            <div className="preference-section">
-              <div className="preference-group">
-                <label className="preference-label">
-                  <i className="bi bi-calendar-event"></i>
-                  Occasion
-                </label>
-                <div className="preference-options">
-                  {[
-                    { value: 'casual', label: 'Casual', icon: 'bi-house' },
-                    { value: 'work', label: 'Work', icon: 'bi-briefcase' },
-                    { value: 'formal', label: 'Formal', icon: 'bi-suit-spade' },
-                    { value: 'date', label: 'Date', icon: 'bi-heart' },
-                    { value: 'workout', label: 'Workout', icon: 'bi-activity' },
-                    { value: 'party', label: 'Party', icon: 'bi-music-note-beamed' }
-                  ].map((item) => (
-                    <button
-                      key={item.value}
-                      className={`preference-btn ${occasion === item.value ? 'active' : ''}`}
-                      onClick={() => setOccasion(item.value)}
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="preference-group">
-                <label className="preference-label">
-                  <i className="bi bi-thermometer-half"></i>
-                  Season
-                </label>
-                <div className="preference-options">
-                  {[
-                    { value: 'spring', label: 'Spring', icon: 'bi-flower1' },
-                    { value: 'summer', label: 'Summer', icon: 'bi-sun' },
-                    { value: 'fall', label: 'Fall', icon: 'bi-tree' },
-                    { value: 'winter', label: 'Winter', icon: 'bi-snow' }
-                  ].map((item) => (
-                    <button
-                      key={item.value}
-                      className={`preference-btn season-${item.value} ${season === item.value ? 'active' : ''}`}
-                      onClick={() => setSeason(item.value)}
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="preference-group">
-                <label className="preference-label">
-                  <i className="bi bi-cloud-sun"></i>
-                  Weather
-                </label>
-
-                {/* Auto-detected weather badge */}
-                {weatherLoading && (
-                  <div className="weather-badge loading">
-                    <div className="spinner" style={{ width: '0.8rem', height: '0.8rem', border: '2px solid rgba(102,126,234,0.3)', borderTopColor: '#667eea', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }}></div>
-                    <span>Detecting weather...</span>
-                  </div>
-                )}
-                {!weatherLoading && detectedWeather && (
-                  <div className="weather-badge detected">
-                    <i className={`bi ${weatherIcon}`}></i>
-                    <span>
-                      Detected: {detectedWeather.charAt(0).toUpperCase() + detectedWeather.slice(1)}
-                      {temperature !== null && ` (${temperature}°C)`}
-                      {locationName && ` — ${locationName}`}
-                    </span>
-                  </div>
-                )}
-                {!weatherLoading && weatherError && (
-                  <div className="weather-badge error">
-                    <i className="bi bi-exclamation-circle"></i>
-                    <span>{weatherError} — select manually</span>
-                  </div>
-                )}
-
-                <div className="preference-options">
-                  {[
-                    { value: 'sunny', label: 'Sunny', icon: 'bi-brightness-high' },
-                    { value: 'rainy', label: 'Rainy', icon: 'bi-cloud-rain' },
-                    { value: 'cold', label: 'Cold', icon: 'bi-thermometer-low' },
-                    { value: 'hot', label: 'Hot', icon: 'bi-thermometer-high' },
-                    { value: 'windy', label: 'Windy', icon: 'bi-wind' }
-                  ].map((item) => (
-                    <button
-                      key={item.value}
-                      className={`preference-btn weather-${item.value} ${weather === item.value ? 'active' : ''}`}
-                      onClick={() => setWeather(item.value)}
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="preference-group">
-                <label className="preference-label">
-                  <i className="bi bi-palette"></i>
-                  Style Vibe <span className="optional">(Optional)</span>
-                </label>
-                <div className="preference-options">
-                  {[
-                    { value: 'classic', label: 'Classic' },
-                    { value: 'trendy', label: 'Trendy' },
-                    { value: 'bohemian', label: 'Bohemian' },
-                    { value: 'minimalist', label: 'Minimalist' },
-                    { value: 'streetwear', label: 'Streetwear' },
-                    { value: 'preppy', label: 'Preppy' },
-                    { value: 'vintage', label: 'Vintage' }
-                  ].map((item) => (
-                    <button
-                      key={item.value}
-                      className={`preference-btn style-${item.value} ${styleVibe === item.value ? 'active' : ''}`}
-                      onClick={() => setStyleVibe(styleVibe === item.value ? '' : item.value)}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="generate-section">
-              {notice && (
-                <div className={`inline-notice ${notice.type}`} role="status">
-                  <i className={`bi ${notice.type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'}`}></i>
-                  <span>{notice.text}</span>
-                  <button className="notice-close" onClick={() => setNotice(null)} aria-label="Dismiss message">
-                    <i className="bi bi-x"></i>
-                  </button>
-                </div>
-              )}
-              <button 
-                className={`generate-btn ${isGenerating ? 'generating' : ''}`}
-                onClick={() => !isGenerating && generateOutfit()}
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="spinner"></div>
-                    <span style={{textAlign: "center", display: "inline-block"}}>Generating...<br/><small style={{fontSize: "0.75rem", opacity: 0.8}}>(Using free AI, may be slow)</small></span>
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-magic"></i>
-                    <span>Generate Perfect Outfit</span>
-                  </>
-                )}
-              </button>
-              {wardrobeItems.length === 0 && (
-                <p className="wardrobe-notice">
-                  <i className="bi bi-info-circle"></i>
-                  Add items to your wardrobe to generate outfits
-                </p>
-              )}
+          {/* Occasion */}
+          <div>
+            <h3 className="font-display font-semibold text-sm mb-3 uppercase tracking-widest text-on-surface/80 flex items-center gap-2">
+              <span className="w-4 h-[1px] bg-outline-variant"></span> Occasion
+            </h3>
+            <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2" role="group">
+              {['casual', 'work', 'formal', 'date', 'workout', 'party'].map(val => (
+                <button
+                  key={val}
+                  onClick={() => setOccasion(val)}
+                  className={`flex-shrink-0 px-5 py-2.5 rounded-full font-label text-sm capitalize transition shadow-sm border ${
+                    occasion === val 
+                      ? 'bg-primary-container text-on-primary border-primary-container font-semibold' 
+                      : 'bg-surface-container-lowest text-on-surface border-outline-variant/30 hover:border-primary-container/30'
+                  }`}
+                >
+                  {val}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* History Sidebar */}
-          <div className="history-sidebar">
-            <div className="sidebar-header">
-              <h3>Recent Outfits</h3>
-              {outfitHistory.length > 0 && (
-                <span className="clear-history" onClick={() => clearHistoryMutation({ userId })}>Clear All</span>
-              )}
+          {/* Weather Status */}
+          <div className="bg-surface-container-low p-4 rounded-lg flex items-center justify-between border border-outline-variant/20 shadow-[0_2px_12px_rgba(26,28,28,0.02)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                {weatherLoading ? <FiRefreshCcw className="animate-spin" /> : <FiCloud />}
+              </div>
+              <div>
+                <p className="font-display font-semibold text-sm">Weather Detect</p>
+                <p className="font-body text-xs text-on-surface/60 mt-0.5">
+                  {weatherLoading ? 'Detecting local climate...' : (weatherError ? 'Detection failed' : `Live: ${temperature}°C in ${locationName}`)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Season & Weather Manually */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="font-display font-semibold text-sm mb-3 uppercase tracking-widest text-on-surface/80 flex items-center gap-2">
+                <span className="w-4 h-[1px] bg-outline-variant"></span> Season
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['spring', 'summer', 'fall', 'winter'].map(val => (
+                  <button
+                    key={val}
+                    onClick={() => setSeason(val)}
+                    className={`px-4 py-2 rounded-full font-label text-xs uppercase tracking-wider transition border ${
+                      season === val 
+                        ? 'bg-secondary-container text-on-secondary-container border-secondary-container font-semibold' 
+                        : 'bg-surface-container-lowest text-on-surface border-outline-variant/30'
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
             </div>
             
-            <div className="history-list">
-              {outfitHistory.length === 0 ? (
-                <div className="empty-history">
-                  <i className="bi bi-clock-history"></i>
-                  <p>No outfits generated yet</p>
-                </div>
-              ) : (
-                outfitHistory.slice(0, 5).map((outfit) => (
-                  <div key={outfit._id} className="history-item">
-                    <div className="history-images">
-                      {(outfit.items || []).slice(0, 3).map((item, index) => (
-                        <img key={index} src={item.imageUrl} alt={item.name} />
-                      ))}
-                    </div>
-                    <div className="history-info">
-                      <h4>{outfit.title}</h4>
-                      <p>{new Date(outfit.createdAt).toLocaleDateString()}</p>
-                      <div className="history-tags">
-                        <span className="tag">{outfit.occasion}</span>
-                        <span className="tag">{outfit.season}</span>
-                      </div>
-                    </div>
-                    <button 
-                      className={`favorite-btn ${outfit.isFavorite ? 'active' : ''}`}
-                      onClick={() => toggleFavorite(outfit._id)}
-                    >
-                      <i className={outfit.isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
-                    </button>
-                  </div>
-                ))
-              )}
+            <div>
+              <h3 className="font-display font-semibold text-sm mb-3 uppercase tracking-widest text-on-surface/80 flex items-center gap-2">
+                <span className="w-4 h-[1px] bg-outline-variant"></span> Condition
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['sunny', 'rainy', 'cold', 'hot', 'windy'].map(val => (
+                  <button
+                    key={val}
+                    onClick={() => setWeather(val)}
+                    className={`px-4 py-2 rounded-full font-label text-xs capitalize transition border ${
+                      weather === val 
+                        ? 'bg-surface-container-highest text-on-surface border-on-surface font-semibold' 
+                        : 'bg-surface-container-lowest text-on-surface border-outline-variant/30'
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Outfit Modal */}
-      {showModal && generatedOutfit && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-title-section">
-                <h2>{generatedOutfit.title}</h2>
-                <div className="outfit-meta">
-                  <span className="meta-tag occasion">{generatedOutfit.occasion}</span>
-                  <span className="meta-tag season">{generatedOutfit.season}</span>
-                  <span className="meta-tag weather">{generatedOutfit.weather}</span>
-                  {generatedOutfit.styleVibe && (
-                    <span className="meta-tag style">{generatedOutfit.styleVibe}</span>
-                  )}
+          {/* Notice & CTA */}
+          <div className="pt-4">
+            {notice && (
+              <div className="mb-4 bg-error-container text-on-error-container p-4 rounded-md font-body text-sm flex justify-between items-start">
+                <span>{notice.text}</span>
+                <button onClick={() => setNotice(null)}><FiX /></button>
+              </div>
+            )}
+            <button 
+              onClick={() => !isGenerating && generateOutfit()}
+              disabled={isGenerating || wardrobeItems.length === 0}
+              className="w-full flex items-center justify-center gap-3 bg-primary-container text-on-primary px-8 py-4 rounded-lg font-body font-semibold text-lg hover:opacity-90 transition shadow-ambient disabled:opacity-50"
+            >
+              {isGenerating ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin flex-shrink-0" />
+                  Generating Curated Look...
+                </>
+              ) : (
+                'Generate Styles'
+              )}
+            </button>
+          </div>
+
+        </div>
+
+        {/* History (Right Side Desktop) */}
+        <div className="lg:col-span-5 flex flex-col gap-6 lg:border-l lg:border-outline-variant/20 lg:pl-12">
+          <div className="flex justify-between items-center">
+            <h3 className="font-display font-bold text-lg">Recent Generations</h3>
+            {outfitHistory.length > 0 && (
+              <button 
+                onClick={() => clearHistoryMutation({ userId })}
+                className="font-label text-xs font-semibold text-error/80 uppercase tracking-widest hover:text-error"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          
+          <div className="flex flex-col gap-4">
+            {outfitHistory.length === 0 ? (
+              <div className="p-8 text-center text-on-surface/50 font-body text-sm bg-surface-container-low rounded-lg">
+                Your styling history will appear here.
+              </div>
+            ) : (
+              outfitHistory.slice(0, 4).map((outfit) => (
+                <div key={outfit._id} className="bg-surface-container-lowest border border-outline-variant/30 p-4 rounded-lg flex items-center gap-4 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-shadow">
+                  <div className="flex -space-x-4">
+                    {(outfit.items || []).slice(0, 3).map((item, idx) => (
+                      <div key={idx} className="w-12 h-12 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-container-low relative shadow-sm">
+                        <img src={item.imageUrl} className="w-full h-full object-cover mix-blend-multiply" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex-grow">
+                    <h4 className="font-body font-semibold text-sm line-clamp-1">{outfit.title}</h4>
+                    <p className="font-label text-[10px] text-on-surface/60 uppercase tracking-widest mt-1">
+                      {outfit.occasion} · {outfit.season}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => toggleFavorite(outfit._id)}
+                    className="p-2 -mr-2 text-primary-container"
+                  >
+                    {outfit.isFavorite ? <FiHeart className="fill-primary-container text-primary-container" /> : <FiHeart />}
+                  </button>
                 </div>
-              </div>
-              <div className="modal-actions">
-                <button 
-                  className={`favorite-btn ${generatedOutfit.isFavorite ? 'active' : ''}`}
-                  onClick={() => toggleFavorite(generatedOutfit._id || generatedOutfit.id)}
-                >
-                  <i className={generatedOutfit.isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
-                </button>
-                <button className="close-btn" onClick={handleCloseModal}>
-                  <i className="bi bi-x"></i>
-                </button>
-              </div>
+              ))
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Generation Result Swipe Modal (AI Suggestions Style) */}
+      {showModal && generatedOutfit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pb-safe">
+          <div className="absolute inset-0 bg-on-surface/20 backdrop-blur-md" onClick={handleCloseModal}></div>
+          
+          <div className="relative w-full max-w-lg max-h-[90vh] bg-surface-container-lowest rounded-2xl shadow-ambient overflow-y-auto hide-scrollbar flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 flex justify-between items-center z-10">
+              <h2 className="font-display font-bold text-lg">{generatedOutfit.title}</h2>
+              <button onClick={handleCloseModal} className="p-2 -mr-2 rounded-full hover:bg-surface-container-low transition">
+                <FiX />
+              </button>
             </div>
 
-            <div className="modal-body">
-              <div className="outfit-showcase">
+            {/* Modal Body */}
+            <div className="p-6 flex flex-col gap-8">
+              
+              <div className="flex justify-center gap-2">
+                <span className="px-3 py-1 bg-surface-container-high rounded-full font-label text-[10px] uppercase tracking-wider">{generatedOutfit.occasion}</span>
+                <span className="px-3 py-1 bg-surface-container-high rounded-full font-label text-[10px] uppercase tracking-wider">{generatedOutfit.season}</span>
+              </div>
+
+              {/* The "Swipe" Canvas Area */}
+              <div className="grid grid-cols-2 gap-4">
                 {generatedOutfit.items.map((item, index) => (
-                  <div key={index} className="showcase-item">
-                    <div className="item-image-container">
-                      <img src={item.imageUrl} alt={item.name} />
-                      <div className="item-category-badge">
-                        <span className={`category-dot ${item.category.toLowerCase()}`}></span>
-                        {item.category}
-                      </div>
+                  <div key={index} className="flex flex-col gap-2">
+                    <div className="aspect-[4/5] bg-surface-container-low rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
+                      <img src={item.imageUrl} className="w-full h-full object-cover mix-blend-multiply" />
                     </div>
-                    <div className="item-info">
-                      <h4>{item.name}</h4>
-                      <div className="item-seasons">
-                        {item.seasons && item.seasons.map(season => (
-                          <span key={season} className="season-badge">{season}</span>
-                        ))}
-                      </div>
+                    <div>
+                      <p className="font-body font-semibold text-xs line-clamp-1">{item.name}</p>
+                      <p className="font-label text-[9px] uppercase tracking-wider text-on-surface/50 mt-0.5">{item.category}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="outfit-description">
-                <h3>About This Outfit</h3>
-            {aiDescription ? (
-              <p>{aiDescription}</p>
-            ) : (
-              <p>
-                Perfect for {generatedOutfit.occasion} occasions during {generatedOutfit.season} season. 
-                {generatedOutfit.weather !== generatedOutfit.season && ` Ideal for ${generatedOutfit.weather} weather.`}
-                {generatedOutfit.styleVibe && ` Styled with a ${generatedOutfit.styleVibe} vibe.`}
-              </p>
-            )}
+              {/* AI Description Plate */}
+              <div className="bg-secondary-container/30 px-6 py-5 rounded-lg border border-secondary-container/50 text-center">
+                <p className="font-display font-semibold text-sm text-primary-container mb-2">Curator Notes</p>
+                {aiDescription ? (
+                  <p className="font-body text-sm leading-relaxed text-on-surface/80">{aiDescription}</p>
+                ) : (
+                  <p className="font-body text-sm leading-relaxed text-on-surface/80">
+                    A curated {generatedOutfit.occasion} aesthetic tailored for {generatedOutfit.season} weather. 
+                  </p>
+                )}
               </div>
 
-              <div className="outfit-actions">
-                <button className="action-btn primary" onClick={regenerateOutfit}>
-                  <i className="bi bi-arrow-clockwise"></i>
-                  Generate Similar
+              {/* Actions Footer */}
+              <div className="flex justify-between items-center pt-4 border-t border-outline-variant/20">
+                <button 
+                  onClick={() => toggleFavorite(generatedOutfit._id || generatedOutfit.id)}
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container-high transition"
+                >
+                  {generatedOutfit.isFavorite ? <FiHeart className="fill-error text-error" /> : <FiHeart className="text-on-surface" />}
                 </button>
-                <button className="action-btn secondary">
-                  <i className="bi bi-share"></i>
-                  Share Outfit
+                
+                <button 
+                  onClick={regenerateOutfit}
+                  className="flex-grow mx-4 items-center justify-center gap-2 bg-primary-container text-on-primary px-4 py-3 rounded-md font-body font-semibold text-sm hover:opacity-90 transition shadow-ambient"
+                >
+                  Regenerate
                 </button>
-                <button className="action-btn secondary">
-                  <i className="bi bi-download"></i>
-                  Save Image
+
+                <button className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container-high transition text-on-surface">
+                  <FiShare />
                 </button>
               </div>
+
             </div>
           </div>
         </div>
       )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      `}} />
     </div>
   );
 }
