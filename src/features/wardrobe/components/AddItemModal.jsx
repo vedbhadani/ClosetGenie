@@ -4,17 +4,19 @@ import { useAIService } from '@/features/ai/services/aiService';
 import { useMutation } from 'convex/react';
 import { api } from '@convex/_generated/api';
 
-const AddItemModal = ({ onClose, onAdd }) => {
+const AddItemModal = ({ onClose, onAdd, editItem }) => {
   const [image, setImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [selectedSeasons, setSelectedSeasons] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState(editItem?.imageUrl || null);
+  const [selectedSeasons, setSelectedSeasons] = useState(
+    editItem?.seasons?.map(s => s.charAt(0).toUpperCase() + s.slice(1)) || []
+  );
   const [formData, setFormData] = useState({
-    name: '',
-    category: 'Tops',
+    name: editItem?.name || '',
+    category: editItem?.category || 'Tops',
     material: 'Cotton',
-    color: '',
+    color: editItem?.color || '',
   });
-  const [aiTags, setAiTags] = useState([]);
+  const [aiTags, setAiTags] = useState(editItem?.tags || []);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiDetected, setAiDetected] = useState(false);
   const aiError = false; 
@@ -166,14 +168,14 @@ const AddItemModal = ({ onClose, onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !image || selectedSeasons.length === 0) {
+    if (!formData.name || (!image && !editItem) || selectedSeasons.length === 0) {
       return;
     }
 
     const newItem = {
       name: formData.name,
       category: formData.category,
-      imageFile: image,
+      imageFile: image || undefined,
       seasons: selectedSeasons.includes('All') 
         ? ['all seasons'] 
         : selectedSeasons.map(s => s.toLowerCase()),
@@ -189,7 +191,7 @@ const AddItemModal = ({ onClose, onAdd }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-container" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Add New Item</h2>
+          <h2>{editItem ? 'Edit Item' : 'Add New Item'}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
 
@@ -345,9 +347,9 @@ const AddItemModal = ({ onClose, onAdd }) => {
             <button 
               type="submit" 
               className="add-btn"
-              disabled={!formData.name || !image || selectedSeasons.length === 0}
+              disabled={!formData.name || (!image && !editItem) || selectedSeasons.length === 0}
             >
-              Add to Wardrobe
+              {editItem ? 'Save Changes' : 'Add to Wardrobe'}
             </button>
           </div>
         </form>

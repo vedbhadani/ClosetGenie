@@ -11,6 +11,7 @@ function Wardrobe() {
 
   const [activeFilter, setActiveFilter] = useState('All Items');
   const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
@@ -22,6 +23,7 @@ function Wardrobe() {
   const generateUploadUrl = useMutation(api.wardrobe.generateUploadUrl);
   const addClothingItem = useMutation(api.wardrobe.addClothingItem);
   const deleteItemMutation = useMutation(api.wardrobe.deleteClothingItem);
+  const updateItemMutation = useMutation(api.wardrobe.updateClothingItem);
 
   const handleAddItem = async (newItem) => {
     try {
@@ -62,6 +64,51 @@ function Wardrobe() {
     } catch(err) {
       console.error(err);
     }
+  };
+
+  const handleEditItem = (item) => {
+    setEditingItem(item);
+    setShowModal(true);
+  };
+
+  const handleUpdateItem = async (updatedData) => {
+    try {
+      if (!editingItem) return;
+      setIsUploading(true);
+
+      const updatePayload = {
+        itemId: editingItem._id,
+        name: updatedData.name,
+        category: updatedData.category,
+        seasons: updatedData.seasons,
+        ...(updatedData.color && { color: updatedData.color }),
+        ...(updatedData.tags && { tags: updatedData.tags }),
+      };
+
+      // If a new image was uploaded, store it first
+      if (updatedData.imageFile) {
+        const postUrl = await generateUploadUrl();
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": updatedData.imageFile.type },
+          body: updatedData.imageFile,
+        });
+        const { storageId } = await result.json();
+        updatePayload.imageId = storageId;
+      }
+
+      await updateItemMutation(updatePayload);
+    } catch (error) {
+      console.error('Error updating item:', error);
+    } finally {
+      setIsUploading(false);
+      setEditingItem(null);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingItem(null);
   };
 
   const getFilteredItems = () => {
@@ -293,6 +340,7 @@ function Wardrobe() {
                       <div className="item-actions">
                         <button 
                           className="action-btn edit-btn"
+                          onClick={() => handleEditItem(item)}
                           aria-label="Edit item"
                         >
                           <i className="bi bi-pencil"></i>
@@ -353,8 +401,9 @@ function Wardrobe() {
 
       {showModal && (
         <AddItemModal 
-          onClose={() => setShowModal(false)} 
-          onAdd={handleAddItem}
+          onClose={handleCloseModal} 
+          onAdd={editingItem ? handleUpdateItem : handleAddItem}
+          editItem={editingItem}
         />
       )}
     </div>

@@ -74,6 +74,31 @@ export const deleteClothingItem = mutation({
   },
 });
 
+export const updateClothingItem = mutation({
+  args: {
+    itemId: v.id("clothes"),
+    name: v.string(),
+    category: v.string(),
+    seasons: v.array(v.string()),
+    color: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    imageId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    const { itemId, imageId, ...updates } = args;
+    const existing = await ctx.db.get(itemId);
+    if (!existing) return;
+
+    // If a new image was provided, delete the old one
+    if (imageId && imageId !== existing.imageId) {
+      await ctx.storage.delete(existing.imageId);
+      updates.imageId = imageId;
+    }
+
+    return await ctx.db.patch(itemId, updates);
+  },
+});
+
 export const addOutfit = mutation({
   args: {
     userId: v.string(),
