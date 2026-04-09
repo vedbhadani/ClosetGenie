@@ -20,11 +20,11 @@ export default function OutfitPlanner() {
   const plannedOutfits = rawPlanned || [];
   const outfitHistory = rawHistory || [];
 
-  if (isLoading) return <PlannerSkeleton />;
-
   // Convex mutations
   const addPlan = useMutation(api.planner.addPlannedOutfit);
   const deletePlan = useMutation(api.planner.deletePlannedOutfit);
+
+  if (isLoading) return <PlannerSkeleton />;
 
   // ── Calendar helpers ──
   const year = currentDate.getFullYear();

@@ -15,12 +15,12 @@ function OutfitHistory() {
   const rawOutfits = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip");
   const isLoading = !isUserLoaded || (userId && rawOutfits === undefined);
   const outfits = rawOutfits || [];
-
-  if (isLoading) return <HistorySkeleton />;
   
   const toggleFavoriteMutation = useMutation(api.wardrobe.toggleFavoriteOutfit);
   const deleteOutfitMutation = useMutation(api.wardrobe.deleteOutfit);
   const clearHistoryMutation = useMutation(api.wardrobe.clearHistory);
+
+  if (isLoading) return <HistorySkeleton />;
 
   const clearAll = async () => {
     if (!userId) return;

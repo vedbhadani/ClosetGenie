@@ -22,12 +22,12 @@ function Wardrobe() {
   const isLoading = !isUserLoaded || (userId && getClothes === undefined);
   const items = getClothes || [];
 
-  if (isLoading) return <WardrobeSkeleton />;
-
   const generateUploadUrl = useMutation(api.wardrobe.generateUploadUrl);
   const addClothingItem = useMutation(api.wardrobe.addClothingItem);
   const deleteItemMutation = useMutation(api.wardrobe.deleteClothingItem);
   const updateItemMutation = useMutation(api.wardrobe.updateClothingItem);
+
+  if (isLoading) return <WardrobeSkeleton />;
 
   const handleAddItem = async (newItem) => {
     try {

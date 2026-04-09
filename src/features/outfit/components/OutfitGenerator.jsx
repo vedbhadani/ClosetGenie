@@ -48,12 +48,12 @@ export default function OutfitGenerator() {
   const outfitHistory = rawHistory || [];
   const favoriteOutfits = outfitHistory.filter(o => o.isFavorite);
 
-  if (isLoading) return <GeneratorSkeleton />;
-
   const addOutfitMutation = useMutation(api.wardrobe.addOutfit);
   const toggleFavoriteMutation = useMutation(api.wardrobe.toggleFavoriteOutfit);
   const clearHistoryMutation = useMutation(api.wardrobe.clearHistory);
   const runCreativeAIMutation = useAction(api.ai.runCreativeAI);
+
+  if (isLoading) return <GeneratorSkeleton />;
 
   const handleCloseModal = () => {
     setShowModal(false);
