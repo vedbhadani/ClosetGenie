@@ -3,9 +3,10 @@ import './OutfitPlanner.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
+import { PlannerSkeleton } from '@/shared/components/PageSkeleton';
 
 export default function OutfitPlanner() {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const userId = user?.id;
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -13,8 +14,13 @@ export default function OutfitPlanner() {
   const [showModal, setShowModal] = useState(false);
 
   // Convex queries
-  const plannedOutfits = useQuery(api.planner.getUserPlannedOutfits, userId ? { userId } : "skip") || [];
-  const outfitHistory = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip") || [];
+  const rawPlanned = useQuery(api.planner.getUserPlannedOutfits, userId ? { userId } : "skip");
+  const rawHistory = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip");
+  const isLoading = !isUserLoaded || (userId && (rawPlanned === undefined || rawHistory === undefined));
+  const plannedOutfits = rawPlanned || [];
+  const outfitHistory = rawHistory || [];
+
+  if (isLoading) return <PlannerSkeleton />;
 
   // Convex mutations
   const addPlan = useMutation(api.planner.addPlannedOutfit);

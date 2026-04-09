@@ -4,9 +4,10 @@ import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '@convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
 import useWeather from '@/features/weather/hooks/useWeather';
+import { GeneratorSkeleton } from '@/shared/components/PageSkeleton';
 
 export default function OutfitGenerator() {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const userId = user?.id;
 
   // Weather auto-detection
@@ -40,9 +41,14 @@ export default function OutfitGenerator() {
   }, [detectedWeather, weatherAutoFilled]);
 
   // Load data from Convex
-  const wardrobeItems = useQuery(api.wardrobe.getUserClothes, userId ? { userId } : "skip") || [];
-  const outfitHistory = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip") || [];
+  const rawWardrobe = useQuery(api.wardrobe.getUserClothes, userId ? { userId } : "skip");
+  const rawHistory = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip");
+  const isLoading = !isUserLoaded || (userId && (rawWardrobe === undefined || rawHistory === undefined));
+  const wardrobeItems = rawWardrobe || [];
+  const outfitHistory = rawHistory || [];
   const favoriteOutfits = outfitHistory.filter(o => o.isFavorite);
+
+  if (isLoading) return <GeneratorSkeleton />;
 
   const addOutfitMutation = useMutation(api.wardrobe.addOutfit);
   const toggleFavoriteMutation = useMutation(api.wardrobe.toggleFavoriteOutfit);

@@ -3,15 +3,20 @@ import './OutfitHistory.css';
 import { useQuery, useMutation } from "convex/react";
 import { api } from '@convex/_generated/api';
 import { useUser } from "@clerk/clerk-react";
+import { HistorySkeleton } from '@/shared/components/PageSkeleton';
 
 function OutfitHistory() {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const userId = user?.id;
 
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [selectedOutfit, setSelectedOutfit] = useState(null);
 
-  const outfits = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip") || [];
+  const rawOutfits = useQuery(api.wardrobe.getOutfitHistory, userId ? { userId } : "skip");
+  const isLoading = !isUserLoaded || (userId && rawOutfits === undefined);
+  const outfits = rawOutfits || [];
+
+  if (isLoading) return <HistorySkeleton />;
   
   const toggleFavoriteMutation = useMutation(api.wardrobe.toggleFavoriteOutfit);
   const deleteOutfitMutation = useMutation(api.wardrobe.deleteOutfit);

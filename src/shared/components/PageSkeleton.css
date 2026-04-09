@@ -1,0 +1,271 @@
+.skeleton-page {
+  min-height: 80vh;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton-bone {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.05) 25%, 
+    rgba(255,255,255,0.1) 50%, 
+    rgba(255,255,255,0.05) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Header skeleton */
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding: 2rem 0;
+}
+
+.skeleton-header-text { flex: 1; }
+
+.skeleton-title {
+  height: 36px;
+  width: 280px;
+  margin-bottom: 12px;
+}
+
+.skeleton-subtitle {
+  height: 18px;
+  width: 380px;
+}
+
+.skeleton-header-btn {
+  height: 44px;
+  width: 160px;
+  border-radius: 12px;
+}
+
+/* Stats skeleton */
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.skeleton-stat-card {
+  height: 90px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Filter tabs skeleton */
+.skeleton-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.skeleton-filter-tab {
+  height: 38px;
+  width: 100px;
+  border-radius: 20px;
+}
+
+.skeleton-filter-tab:first-child { width: 110px; }
+.skeleton-filter-tab:nth-child(2) { width: 80px; }
+.skeleton-filter-tab:nth-child(3) { width: 95px; }
+.skeleton-filter-tab:nth-child(4) { width: 105px; }
+
+/* Search bar skeleton */
+.skeleton-search {
+  height: 48px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+}
+
+/* Grid skeleton */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.skeleton-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.skeleton-card-image {
+  height: 220px;
+  width: 100%;
+  border-radius: 0;
+}
+
+.skeleton-card-body {
+  padding: 1rem;
+}
+
+.skeleton-card-title {
+  height: 20px;
+  width: 70%;
+  margin-bottom: 10px;
+}
+
+.skeleton-card-meta {
+  height: 14px;
+  width: 50%;
+  margin-bottom: 8px;
+}
+
+.skeleton-card-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.skeleton-tag {
+  height: 24px;
+  width: 60px;
+  border-radius: 12px;
+}
+
+/* Calendar skeleton (planner) */
+.skeleton-calendar {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.skeleton-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-calendar-nav {
+  height: 36px;
+  width: 36px;
+  border-radius: 8px;
+}
+
+.skeleton-calendar-month {
+  height: 28px;
+  width: 180px;
+}
+
+.skeleton-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.skeleton-calendar-day {
+  height: 80px;
+  border-radius: 8px;
+}
+
+.skeleton-calendar-day-header {
+  height: 30px;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+/* Form skeleton (generator) */
+.skeleton-form {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-form-field {
+  height: 48px;
+  border-radius: 10px;
+}
+
+.skeleton-form-btn {
+  height: 52px;
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+/* History card skeleton */
+.skeleton-history-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.skeleton-history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.skeleton-history-title {
+  height: 22px;
+  width: 60%;
+}
+
+.skeleton-history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-history-action {
+  height: 32px;
+  width: 32px;
+  border-radius: 8px;
+}
+
+.skeleton-history-thumbs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-history-thumb {
+  height: 80px;
+  width: 80px;
+  border-radius: 10px;
+}
+
+.skeleton-history-date {
+  height: 14px;
+  width: 120px;
+}
+
+/* Pulse variant for subtle elements */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.skeleton-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}

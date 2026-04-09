@@ -4,9 +4,10 @@ import './wardrobe.css';
 import { useQuery, useMutation } from "convex/react";
 import { api } from '@convex/_generated/api';
 import { useUser } from "@clerk/clerk-react";
+import { WardrobeSkeleton } from '@/shared/components/PageSkeleton';
 
 function Wardrobe() {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const userId = user?.id;
 
   const [activeFilter, setActiveFilter] = useState('All Items');
@@ -18,7 +19,10 @@ function Wardrobe() {
   const [isUploading, setIsUploading] = useState(false);
 
   const getClothes = useQuery(api.wardrobe.getUserClothes, userId ? { userId } : "skip");
-  const items = getClothes || []; // items loaded from Convex
+  const isLoading = !isUserLoaded || (userId && getClothes === undefined);
+  const items = getClothes || [];
+
+  if (isLoading) return <WardrobeSkeleton />;
 
   const generateUploadUrl = useMutation(api.wardrobe.generateUploadUrl);
   const addClothingItem = useMutation(api.wardrobe.addClothingItem);
