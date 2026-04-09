@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './App.css'
 import Home from '@/features/home/components/Home'
 import OutfitGenerator from '@/features/outfit/components/OutfitGenerator';
 import Wardrobe from '@/features/wardrobe/components/Wardrobe'

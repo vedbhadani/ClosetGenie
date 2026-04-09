@@ -1,14 +1,56 @@
-:root {
-  --cg-purple: #6C63FF;
-  --cg-purple-dark: #7C3AED;
-  --cg-accent: #6C63FF;
-  --cg-gradient: linear-gradient(135deg, #6C63FF 0%, #7C3AED 100%);
-  --cg-radius: 12px;
-  --cg-shadow: 0 10px 25px rgba(108, 99, 255, 0.18);
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #f9f9f9;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e8e8e8;
+  
+  --color-primary: #003527;
+  --color-primary-container: #064e3b;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #1a1c1c;
+
+  --color-secondary-container: #cce6d9;
+  --color-on-secondary-container: #50685d;
+  
+  --color-outline-variant: #bfc9c3;
+  --color-error: #ba1a1a;
+
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --shadow-ambient: 0px 32px 32px 0px rgba(26, 28, 28, 0.06);
 }
 
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #111827; }
-html { scroll-behavior: smooth; }
+@layer base {
+  html {
+    overflow-x: hidden;
+  }
 
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headline);
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a1c1c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px !important;
+  }
+}
