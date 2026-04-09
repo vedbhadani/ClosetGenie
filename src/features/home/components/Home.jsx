@@ -1,10 +1,12 @@
 import React from 'react'
-import hero from "../images/hero1.png";
+import hero from '@/images/hero1.png';
 import { Link } from 'react-router-dom';
-import '../App.css';
+import '@/app/App.css';
 import './Home.css';
+import { useUser } from '@clerk/clerk-react';
 
 function Home() {
+  const { user, isSignedIn } = useUser();
   return (
     <div className="home-container">
       {/* Hero Section */}
@@ -15,7 +17,7 @@ function Home() {
               <span>✨ AI-Powered Fashion Assistant</span>
             </div>
             <h1 className="hero-title">
-              Your Smart Wardrobe &<br />
+              {isSignedIn ? `Welcome, ${user.firstName || user.fullName}` : "Your Smart Wardrobe &"}<br />
               <span className="gradient-text">Outfit Planner</span>
             </h1>
             <p className="hero-description">
